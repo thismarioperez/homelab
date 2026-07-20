@@ -128,6 +128,9 @@ GRANT ALL PRIVILEGES ON DATABASE tofu_state TO tofu;
 \c tofu_state
 CREATE SCHEMA core AUTHORIZATION tofu;
 CREATE SCHEMA testbed AUTHORIZATION tofu;
+-- Postgres 15+ revokes CREATE on the public schema from non-owner roles by
+-- default; the pg backend needs it during `tofu init`, so grant it back.
+GRANT CREATE ON SCHEMA public TO tofu;
 
 -- Add more services as needed — same pattern:
 -- CREATE DATABASE <service>;

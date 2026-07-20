@@ -1,2 +1,61 @@
 [tools]
 opentofu = "1.12"
+
+[tasks."tofu:core:init"]
+description = "tofu init for tofu/core, wiring up the pg backend config"
+dir = "{{config_root}}/tofu/core"
+run = "tofu init -backend-config=backend.hcl"
+
+[tasks."tofu:core:plan"]
+description = "tofu plan for tofu/core"
+dir = "{{config_root}}/tofu/core"
+run = "tofu plan"
+
+[tasks."tofu:core:apply"]
+description = "tofu apply for tofu/core"
+dir = "{{config_root}}/tofu/core"
+run = "tofu apply"
+
+[tasks."tofu:core:fmt-check"]
+description = "check tofu/core formatting without modifying files"
+dir = "{{config_root}}/tofu/core"
+run = "tofu fmt -check -diff -recursive"
+
+[tasks."tofu:core:validate"]
+description = "validate tofu/core config"
+dir = "{{config_root}}/tofu/core"
+run = "tofu validate"
+
+[tasks."tofu:testbed:init"]
+description = "tofu init for tofu/testbed, wiring up the pg backend config"
+dir = "{{config_root}}/tofu/testbed"
+run = "tofu init -backend-config=backend.hcl"
+
+[tasks."tofu:testbed:plan"]
+description = "tofu plan for tofu/testbed"
+dir = "{{config_root}}/tofu/testbed"
+run = "tofu plan"
+
+[tasks."tofu:testbed:apply"]
+description = "tofu apply for tofu/testbed"
+dir = "{{config_root}}/tofu/testbed"
+run = "tofu apply"
+
+[tasks."tofu:testbed:fmt-check"]
+description = "check tofu/testbed formatting without modifying files"
+dir = "{{config_root}}/tofu/testbed"
+run = "tofu fmt -check -diff -recursive"
+
+[tasks."tofu:testbed:validate"]
+description = "validate tofu/testbed config"
+dir = "{{config_root}}/tofu/testbed"
+run = "tofu validate"
+
+[tasks."tofu:check"]
+description = "check formatting and validity of all tofu configs"
+depends = [
+  "tofu:core:fmt-check",
+  "tofu:core:validate",
+  "tofu:testbed:fmt-check",
+  "tofu:testbed:validate",
+]
