@@ -1,5 +1,17 @@
+[env]
+_.file = ".env"
+
 [tools]
 opentofu = "1.12"
+1password-cli = "latest"
+
+[tasks."op:whoami"]
+description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
+run = "op whoami"
+
+[tasks."op:read"]
+description = "read a secret from 1Password, e.g. mise run op:read -- op://vault/item/field"
+run = "op read"
 
 [tasks."tofu:core:init"]
 description = "tofu init for tofu/core, wiring up the pg backend config"
@@ -34,12 +46,12 @@ run = "tofu init -backend-config=backend.hcl"
 [tasks."tofu:testbed:plan"]
 description = "tofu plan for tofu/testbed"
 dir = "{{config_root}}/tofu/testbed"
-run = "tofu plan"
+run = "op run --env-file=.env.op -- tofu plan"
 
 [tasks."tofu:testbed:apply"]
 description = "tofu apply for tofu/testbed"
 dir = "{{config_root}}/tofu/testbed"
-run = "tofu apply"
+run = "op run --env-file=.env.op -- tofu apply"
 
 [tasks."tofu:testbed:fmt-check"]
 description = "check tofu/testbed formatting without modifying files"
