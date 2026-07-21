@@ -28,16 +28,6 @@ description = "tofu apply for tofu/core"
 dir = "{{config_root}}/infrastructure/core"
 run = "tofu apply"
 
-[tasks."tofu:core:fmt"]
-description = "check tofu/testbed formatting and modify files"
-dir = "{{config_root}}/infrastructure/core"
-run = "tofu fmt -diff -recursive"
-
-[tasks."tofu:core:fmt-check"]
-description = "check tofu/core formatting without modifying files"
-dir = "{{config_root}}/infrastructure/core"
-run = "tofu fmt -check -diff -recursive"
-
 [tasks."tofu:core:validate"]
 description = "validate tofu/core config"
 dir = "{{config_root}}/infrastructure/core"
@@ -46,7 +36,6 @@ run = "tofu validate"
 [tasks."tofu:core:check"]
 description = "check formatting and validity of tofu/core configs"
 depends = [
-  "tofu:core:fmt-check",
   "tofu:core:validate",
 ]
 
@@ -65,16 +54,6 @@ description = "tofu apply for tofu/testbed"
 dir = "{{config_root}}/infrastructure/testbed"
 run = "tofu apply"
 
-[tasks."tofu:testbed:fmt"]
-description = "check tofu/testbed formatting without modifying files"
-dir = "{{config_root}}/infrastructure/testbed"
-run = "tofu fmt -diff -recursive"
-
-[tasks."tofu:testbed:fmt-check"]
-description = "check tofu/testbed formatting and modify files"
-dir = "{{config_root}}/infrastructure/testbed"
-run = "tofu fmt -check -diff -recursive"
-
 [tasks."tofu:testbed:validate"]
 description = "validate tofu/testbed config"
 dir = "{{config_root}}/infrastructure/testbed"
@@ -83,20 +62,23 @@ run = "tofu validate"
 [tasks."tofu:testbed:check"]
 description = "check formatting and validity of tofu/testbed configs"
 depends = [
-  "tofu:testbed:fmt-check",
   "tofu:testbed:validate",
 ]
 
 [tasks."tofu:fmt"]
-description = "check formatting modify files for all tofu configs"
-depends = [
-  "tofu:core:fmt",
-  "tofu:testbed:fmt",
-]
+description = "check formatting and modify files for all tofu configs"
+dir = "{{config_root}}/infrastructure"
+run = "tofu fmt -diff -recursive"
+
+[tasks."tofu:fmt-check"]
+description = "check formatting of all tofu configs without modifying files"
+dir = "{{config_root}}/infrastructure"
+run = "tofu fmt -check -diff -recursive"
 
 [tasks."tofu:check"]
 description = "check formatting and validity of all tofu configs"
 depends = [
+  "tofu:fmt-check",
   "tofu:core:check",
   "tofu:testbed:check",
 ]
