@@ -40,9 +40,10 @@ resource "proxmox_download_file" "ubuntu_2404" {
 }
 
 module "test_vm" {
+  count  = var.k3_node_count
   source = "../modules/cloud-init-vm"
 
-  vm_name       = "testbed-ubuntu-01"
+  vm_name       = "k3s-${count.index == 0 ? "server" : "agent-${count.index}"}"
   node_name     = var.node_name
   image_file_id = proxmox_download_file.ubuntu_2404.id
 

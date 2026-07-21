@@ -48,3 +48,9 @@ variable "vm_memory" {
   description = "Default memory (MB) for testbed VMs"
   default     = 2560
 }
+
+variable "k3_node_count" {
+  type        = number
+  description = "Number of k3 nodes"
+  default     = 3
+}
