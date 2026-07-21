@@ -25,6 +25,12 @@ variable "op_items" {
   description = "Map of logical secret name to 1Password item title: vm_login (VM cloud-init username/password), vm_ssh_key (VM cloud-init SSH key), proxmox_api (Proxmox API token id/secret), proxmox_ssh (Proxmox node SSH username/password)"
 }
 
+variable "vlan_id" {
+  type        = number
+  description = "Default VLAN ID for testbed VMs"
+  default     = 10
+}
+
 variable "vm_cores" {
   type        = number
   description = "Default vCPU cores for testbed VMs"

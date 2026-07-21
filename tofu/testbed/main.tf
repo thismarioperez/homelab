@@ -49,6 +49,7 @@ module "test_vm" {
   cores     = var.vm_cores
   memory    = var.vm_memory
   disk_size = tonumber(trimsuffix(var.vm_disk_size, "G"))
+  vlan_id   = var.vlan_id
 
   username = data.onepassword_item.secrets["vm_login"].username
   password = data.onepassword_item.secrets["vm_login"].password

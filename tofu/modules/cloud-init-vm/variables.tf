@@ -55,6 +55,12 @@ variable "network_bridge" {
   default     = "vmbr0"
 }
 
+variable "vlan_id" {
+  type        = number
+  description = "VLAN tag to apply to the VM's network interface (null for no tagging)"
+  default     = null
+}
+
 variable "username" {
   type        = string
   description = "Default cloud-init user account username"
