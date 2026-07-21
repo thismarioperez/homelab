@@ -28,7 +28,7 @@ variable "op_items" {
 variable "vm_cores" {
   type        = number
   description = "Default vCPU cores for testbed VMs"
-  default     = 1
+  default     = 2
 }
 
 variable "vm_disk_size" {
@@ -41,10 +41,4 @@ variable "vm_memory" {
   type        = number
   description = "Default memory (MB) for testbed VMs"
   default     = 2560
-}
-
-variable "vm_threads" {
-  type        = number
-  description = "Default vCPU threads per core for testbed VMs"
-  default     = 2
 }
