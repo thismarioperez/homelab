@@ -13,30 +13,30 @@ run = "op whoami"
 description = "read a secret from 1Password, e.g. mise run op:read -- op://vault/item/field"
 run = "op read"
 
-[tasks."tofu:core:init"]
-description = "tofu init for tofu/core, wiring up the pg backend config"
-dir = "{{config_root}}/infrastructure/core"
+[tasks."tofu:lab:init"]
+description = "tofu init for tofu/lab, wiring up the pg backend config"
+dir = "{{config_root}}/infrastructure/lab"
 run = "tofu init -backend-config=backend.hcl"
 
-[tasks."tofu:core:plan"]
-description = "tofu plan for tofu/core"
-dir = "{{config_root}}/infrastructure/core"
+[tasks."tofu:lab:plan"]
+description = "tofu plan for tofu/lab"
+dir = "{{config_root}}/infrastructure/lab"
 run = "tofu plan"
 
-[tasks."tofu:core:apply"]
-description = "tofu apply for tofu/core"
-dir = "{{config_root}}/infrastructure/core"
+[tasks."tofu:lab:apply"]
+description = "tofu apply for tofu/lab"
+dir = "{{config_root}}/infrastructure/lab"
 run = "tofu apply"
 
-[tasks."tofu:core:validate"]
-description = "validate tofu/core config"
-dir = "{{config_root}}/infrastructure/core"
+[tasks."tofu:lab:validate"]
+description = "validate tofu/lab config"
+dir = "{{config_root}}/infrastructure/lab"
 run = "tofu validate"
 
-[tasks."tofu:core:check"]
-description = "check formatting and validity of tofu/core configs"
+[tasks."tofu:lab:check"]
+description = "check formatting and validity of tofu/lab configs"
 depends = [
-  "tofu:core:validate",
+  "tofu:lab:validate",
 ]
 
 [tasks."tofu:testbed:init"]
@@ -79,6 +79,6 @@ run = "tofu fmt -check -diff -recursive"
 description = "check formatting and validity of all tofu configs"
 depends = [
   "tofu:fmt-check",
-  "tofu:core:check",
+  "tofu:lab:check",
   "tofu:testbed:check",
 ]
