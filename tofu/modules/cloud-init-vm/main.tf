@@ -1,3 +1,14 @@
+resource "terraform_data" "password_hash" {
+  input = var.password != null ? bcrypt(var.password) : null
+
+  lifecycle {
+    # bcrypt() re-salts on every evaluation, which would force replacement of
+    # the cloud-init file (and the VM) on every plan. Freeze the hash here;
+    # to rotate the password, taint/replace this resource explicitly.
+    ignore_changes = [input]
+  }
+}
+
 resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   content_type = "snippets"
   datastore_id = var.snippets_datastore_id
@@ -21,7 +32,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
             - ${key}
       %{~endfor~}
       %{~if var.password != null~}
-          passwd: ${bcrypt(var.password)}
+          passwd: ${terraform_data.password_hash.output}
       %{~endif~}
       package_update: true
       packages:
