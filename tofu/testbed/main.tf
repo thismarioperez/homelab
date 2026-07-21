@@ -1,9 +1,32 @@
+provider "onepassword" {}
+
+data "onepassword_vault" "this" {
+  name = var.op_vault_name
+}
+
+data "onepassword_item" "secrets" {
+  for_each = var.op_items
+
+  vault = data.onepassword_vault.this.uuid
+  title = each.value
+}
+
+locals {
+  # "Proxmox Test Server - tofu" stores the token as custom fields ("token
+  # ID"/"token secret") rather than the native username/password attributes,
+  # so they're read via section_map/field_map. Verify the section label with
+  # `tofu console` or `op item get` if this doesn't resolve.
+  proxmox_api_fields = data.onepassword_item.secrets["proxmox_api"].section_map[""].field_map
+}
+
 provider "proxmox" {
-  api_token = "${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
+  endpoint  = var.proxmox_endpoint
+  insecure  = var.proxmox_insecure
+  api_token = "${local.proxmox_api_fields["token ID"].value}=${local.proxmox_api_fields["token secret"].value}"
 
   ssh {
-    username = var.proxmox_ssh_username
-    password = var.proxmox_ssh_password
+    username = data.onepassword_item.secrets["proxmox_ssh"].username
+    password = data.onepassword_item.secrets["proxmox_ssh"].password
   }
 }
 
@@ -27,7 +50,7 @@ module "test_vm" {
   memory    = var.vm_memory
   disk_size = tonumber(trimsuffix(var.vm_disk_size, "G"))
 
-  username = var.vm_username
-  password = var.vm_password
-  ssh_keys = [var.ssh_public_key]
+  username = data.onepassword_item.secrets["vm_login"].username
+  password = data.onepassword_item.secrets["vm_login"].password
+  ssh_keys = [data.onepassword_item.secrets["vm_ssh_key"].public_key]
 }

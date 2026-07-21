@@ -7,6 +7,5 @@ crash.log
 !*.tfvars.example
 backend.hcl
 .env
-.env.op
 
 .claude/settings.local.json

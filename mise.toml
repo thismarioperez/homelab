@@ -46,12 +46,12 @@ run = "tofu init -backend-config=backend.hcl"
 [tasks."tofu:testbed:plan"]
 description = "tofu plan for tofu/testbed"
 dir = "{{config_root}}/tofu/testbed"
-run = "op run --env-file=.env.op -- tofu plan"
+run = "tofu plan"
 
 [tasks."tofu:testbed:apply"]
 description = "tofu apply for tofu/testbed"
 dir = "{{config_root}}/tofu/testbed"
-run = "op run --env-file=.env.op -- tofu apply"
+run = "tofu apply"
 
 [tasks."tofu:testbed:fmt-check"]
 description = "check tofu/testbed formatting without modifying files"

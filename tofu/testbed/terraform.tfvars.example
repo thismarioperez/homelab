@@ -1,1 +1,10 @@
-node_name = "pve"
+node_name        = "pve"
+proxmox_endpoint = "https://<proxmox-host>:8006/"
+proxmox_insecure = false
+op_vault_name    = "<vault>"
+op_items = {
+  vm_login    = "<item title>"
+  vm_ssh_key  = "<item title>"
+  proxmox_api = "<item title>"
+  proxmox_ssh = "<item title>"
+}
