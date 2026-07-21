@@ -61,6 +61,12 @@ variable "vlan_id" {
   default     = null
 }
 
+variable "mac_address" {
+  type        = string
+  description = "MAC address to assign to the VM's network interface (null to let Proxmox auto-generate one)"
+  default     = null
+}
+
 variable "username" {
   type        = string
   description = "Default cloud-init user account username"

@@ -39,8 +39,8 @@ resource "proxmox_download_file" "ubuntu_2404" {
   overwrite    = false
 }
 
-module "test_vm" {
-  count  = var.k3_node_count
+module "k3s_vm" {
+  count  = var.k3s_vm_count
   source = "../modules/ubuntu-vm"
 
   vm_name       = "k3s-${count.index == 0 ? "server" : "agent-${count.index}"}"

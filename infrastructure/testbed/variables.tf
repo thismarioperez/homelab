@@ -49,7 +49,7 @@ variable "vm_memory" {
   default     = 2560
 }
 
-variable "k3_node_count" {
+variable "k3s_vm_count" {
   type        = number
   description = "Number of k3 nodes"
   default     = 3
