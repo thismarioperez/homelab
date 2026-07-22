@@ -15,22 +15,22 @@ run = "op read"
 
 [tasks."tofu:lab:init"]
 description = "tofu init for tofu/lab, wiring up the pg backend config"
-dir = "{{config_root}}/infrastructure/lab"
+dir = "{{config_root}}/tofu/lab"
 run = "tofu init -backend-config=backend.hcl"
 
 [tasks."tofu:lab:plan"]
 description = "tofu plan for tofu/lab"
-dir = "{{config_root}}/infrastructure/lab"
+dir = "{{config_root}}/tofu/lab"
 run = "tofu plan"
 
 [tasks."tofu:lab:apply"]
 description = "tofu apply for tofu/lab"
-dir = "{{config_root}}/infrastructure/lab"
+dir = "{{config_root}}/tofu/lab"
 run = "tofu apply"
 
 [tasks."tofu:lab:validate"]
 description = "validate tofu/lab config"
-dir = "{{config_root}}/infrastructure/lab"
+dir = "{{config_root}}/tofu/lab"
 run = "tofu validate"
 
 [tasks."tofu:lab:check"]
@@ -41,22 +41,22 @@ depends = [
 
 [tasks."tofu:testbed:init"]
 description = "tofu init for tofu/testbed, wiring up the pg backend config"
-dir = "{{config_root}}/infrastructure/testbed"
+dir = "{{config_root}}/tofu/testbed"
 run = "tofu init -backend-config=backend.hcl"
 
 [tasks."tofu:testbed:plan"]
 description = "tofu plan for tofu/testbed"
-dir = "{{config_root}}/infrastructure/testbed"
+dir = "{{config_root}}/tofu/testbed"
 run = "tofu plan"
 
 [tasks."tofu:testbed:apply"]
 description = "tofu apply for tofu/testbed"
-dir = "{{config_root}}/infrastructure/testbed"
+dir = "{{config_root}}/tofu/testbed"
 run = "tofu apply"
 
 [tasks."tofu:testbed:validate"]
 description = "validate tofu/testbed config"
-dir = "{{config_root}}/infrastructure/testbed"
+dir = "{{config_root}}/tofu/testbed"
 run = "tofu validate"
 
 [tasks."tofu:testbed:check"]
@@ -67,12 +67,12 @@ depends = [
 
 [tasks."tofu:fmt"]
 description = "check formatting and modify files for all tofu configs"
-dir = "{{config_root}}/infrastructure"
+dir = "{{config_root}}/tofu"
 run = "tofu fmt -diff -recursive"
 
 [tasks."tofu:fmt-check"]
 description = "check formatting of all tofu configs without modifying files"
-dir = "{{config_root}}/infrastructure"
+dir = "{{config_root}}/tofu"
 run = "tofu fmt -check -diff -recursive"
 
 [tasks."tofu:check"]
