@@ -43,7 +43,7 @@ module "k3s_vm" {
   count  = var.k3s_vm_count
   source = "../modules/ubuntu-vm"
 
-  vm_name       = "k3s-${count.index == 0 ? "server" : "agent-${count.index}"}"
+  vm_name       = "k3s-${count.index == 0 ? "controller" : "worker-${count.index}"}"
   node_name     = var.node_name
   image_file_id = proxmox_download_file.ubuntu_2404.id
 

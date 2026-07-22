@@ -3,6 +3,12 @@ variable "vm_name" {
   description = "Name of the VM"
 }
 
+variable "snippet_key" {
+  type        = string
+  description = "Stable identifier for the cloud-init snippet file name, decoupled from vm_name so renaming the VM doesn't force replacement (defaults to vm_name)"
+  default     = null
+}
+
 variable "vm_id" {
   type        = number
   description = "Proxmox VM ID (auto-assigned if null)"

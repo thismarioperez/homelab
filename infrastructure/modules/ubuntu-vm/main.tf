@@ -1,3 +1,10 @@
+locals {
+  # Decoupled from vm_name: cloud-init file content is immutable once created
+  # (ForceNew), so keeping the hostname/file_name stable lets the Proxmox
+  # display name (var.vm_name) be renamed in place without recreating the VM.
+  snippet_id = coalesce(var.snippet_key, var.vm_name)
+}
+
 resource "terraform_data" "password_hash" {
   input = var.password != null ? bcrypt(var.password) : null
 
@@ -15,10 +22,10 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   node_name    = var.node_name
 
   source_raw {
-    file_name = "${var.vm_name}-user-data.yaml"
+    file_name = "${local.snippet_id}-user-data.yaml"
     data      = <<-EOF
       #cloud-config
-      hostname: ${var.vm_name}
+      hostname: ${local.snippet_id}
       users:
         - default
         - name: ${var.username}
