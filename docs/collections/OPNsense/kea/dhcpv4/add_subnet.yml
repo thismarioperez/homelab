@@ -1,0 +1,26 @@
+info:
+  name: add_subnet
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: http://{{api_url}}/api/kea/dhcpv4/add_subnet
+  body:
+    type: json
+    data: |
+      {
+        "subnet4": {
+          "subnet": "192.168.10.0/24",
+          "description": "example subnet",
+          "valid_lifetime": "4000",
+          "pools": "192.168.10.100-192.168.10.200"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

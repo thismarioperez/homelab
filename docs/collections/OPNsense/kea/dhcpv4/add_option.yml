@@ -1,0 +1,26 @@
+info:
+  name: add_option
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: http://{{api_url}}/api/kea/dhcpv4/add_option
+  body:
+    type: json
+    data: |
+      {
+        "option": {
+          "code": "6",
+          "encoding": "hex",
+          "data": "c0a80001",
+          "description": "domain-name-servers"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

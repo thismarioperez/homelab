@@ -1,0 +1,25 @@
+info:
+  name: set_peer
+  type: http
+  seq: 22
+
+http:
+  method: POST
+  url: http://{{api_url}}/api/kea/dhcpv4/set_peer/$uuid
+  body:
+    type: json
+    data: |
+      {
+        "peer": {
+          "name": "peer1",
+          "role": "primary",
+          "url": "http://192.168.1.2:8000/"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

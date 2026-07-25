@@ -1,0 +1,8 @@
+name: default
+variables:
+  - name: api_url
+    value: 10.30.0.1
+  - secret: true
+    name: api_key
+  - secret: true
+    name: api_secret

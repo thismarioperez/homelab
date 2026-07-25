@@ -1,0 +1,15 @@
+info:
+  name: get_option
+  type: http
+  seq: 16
+
+http:
+  method: GET
+  url: http://{{api_url}}/api/kea/dhcpv4/get_option/$uuid
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

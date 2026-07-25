@@ -1,0 +1,25 @@
+info:
+  name: set
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://{{api_url}}/api/kea/dhcpv4/set
+  body:
+    type: json
+    data: |
+      {
+        "dhcpv4": {
+          "general": {
+            "enabled": "1"
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

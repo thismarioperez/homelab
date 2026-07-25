@@ -1,0 +1,7 @@
+info:
+  name: dhcpv4
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

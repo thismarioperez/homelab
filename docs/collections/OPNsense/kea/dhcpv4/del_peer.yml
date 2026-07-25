@@ -1,0 +1,15 @@
+info:
+  name: del_peer
+  type: http
+  seq: 23
+
+http:
+  method: POST
+  url: http://{{api_url}}/api/kea/dhcpv4/del_peer/$uuid
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

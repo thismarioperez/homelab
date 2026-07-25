@@ -1,0 +1,19 @@
+info:
+  name: set_reservation
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: http://{{api_url}}/api/kea/dhcpv4/set_reservation/$uuid
+  body:
+    type: json
+    data: |
+      {"reservation": {"subnet": "", "ip_address": "192.168.10.50", "hw_address": "00:11:22:33:44:55", "hostname": "myhost", "description": ""}}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
