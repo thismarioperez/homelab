@@ -182,3 +182,5 @@ GRANT ALL PRIVILEGES ON DATABASE <service_name> TO <service_user>;
 ```
 
 Point the service's database config at `<synology-ip>:15432` with the dedicated credentials.
+
+See [`workstation-setup.md`](workstation-setup.md) for how a workstation renders `tofu/{lab,testlab}/backend.hcl` from 1Password to connect to this backend without ever storing the connection string in the repo.

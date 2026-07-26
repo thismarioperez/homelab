@@ -20,9 +20,17 @@ run = "op read"
 description = "load the 1Password management ssh key into ssh-agent"
 run = "op read 'op://Home Network/theforce - management ssh key/private key?ssh-format=openssh' | ssh-add -"
 
+[tasks."tofu:lab:backend"]
+description = "render backend.hcl for tofu/lab from 1Password"
+dir = "{{config_root}}/tofu/lab"
+run = "op inject -i backend.hcl.tpl -o backend.hcl"
+
 [tasks."tofu:lab:init"]
 description = "tofu init for tofu/lab, wiring up the pg backend config"
 dir = "{{config_root}}/tofu/lab"
+depends = [
+  "tofu:lab:backend",
+]
 run = "tofu init -backend-config=backend.hcl"
 
 [tasks."tofu:lab:plan"]
@@ -46,9 +54,17 @@ depends = [
   "tofu:lab:validate",
 ]
 
+[tasks."tofu:testlab:backend"]
+description = "render backend.hcl for tofu/testlab from 1Password"
+dir = "{{config_root}}/tofu/testlab"
+run = "op inject -i backend.hcl.tpl -o backend.hcl"
+
 [tasks."tofu:testlab:init"]
 description = "tofu init for tofu/testlab, wiring up the pg backend config"
 dir = "{{config_root}}/tofu/testlab"
+depends = [
+  "tofu:testlab:backend",
+]
 run = "tofu init -backend-config=backend.hcl"
 
 [tasks."tofu:testlab:plan"]
