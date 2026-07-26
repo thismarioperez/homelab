@@ -54,6 +54,11 @@ description = "ping all tofu/testlab hosts over ssh"
 dir = "{{config_root}}/ansible"
 run = "ansible-playbook playbooks/ping.yml"
 
+[tasks."ansible:testlab:ubuntu-upgrade"]
+description = "full-upgrade apt packages on all tofu/testlab hosts, rebooting if required"
+dir = "{{config_root}}/ansible"
+run = "ansible-playbook playbooks/ubuntu_upgrade.yml"
+
 [tasks."tofu:lab:backend"]
 description = "render backend.hcl for tofu/lab from 1Password"
 dir = "{{config_root}}/tofu/lab"
