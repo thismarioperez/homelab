@@ -1,1 +1,0 @@
-ansible_user: "{{ lookup('community.general.onepassword', 'Proxmox VM - Default User', field='username', vault='Home Network') }}"

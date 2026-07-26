@@ -4,9 +4,6 @@ _.file = ".env"
 [tools]
 opentofu = "1.12"
 1password-cli = "latest"
-python = "3"
-pipx = "latest"
-"pipx:ansible" = { version = "latest", pipx_args = "--include-deps" }
 
 [tasks."op:whoami"]
 description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
