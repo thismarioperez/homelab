@@ -127,7 +127,7 @@ CREATE USER tofu WITH PASSWORD '<tofu-password>';
 GRANT ALL PRIVILEGES ON DATABASE tofu_state TO tofu;
 \c tofu_state
 CREATE SCHEMA lab AUTHORIZATION tofu;
-CREATE SCHEMA testbed AUTHORIZATION tofu;
+CREATE SCHEMA testlab AUTHORIZATION tofu;
 -- Postgres 15+ revokes CREATE on the public schema from non-owner roles by
 -- default; the pg backend needs it during `tofu init`, so grant it back.
 GRANT CREATE ON SCHEMA public TO tofu;

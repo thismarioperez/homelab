@@ -1,5 +1,5 @@
 terraform {
   backend "pg" {
-    schema_name = "testbed"
+    schema_name = "testlab"
   }
 }

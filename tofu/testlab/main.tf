@@ -91,7 +91,7 @@ resource "opnsense_kea_dhcpv4_reservation" "k3s_vm" {
   mac_address = local.k3s_vm_macs[count.index]
   ip_address  = local.k3s_vm_ips[count.index]
   hostname    = local.k3s_vm_names[count.index]
-  description = "tofu: tofu/testbed k3s_vm module"
+  description = "tofu: tofu/testlab k3s_vm module"
 }
 
 resource "proxmox_download_file" "ubuntu_2404" {

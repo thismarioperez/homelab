@@ -39,30 +39,30 @@ depends = [
   "tofu:lab:validate",
 ]
 
-[tasks."tofu:testbed:init"]
-description = "tofu init for tofu/testbed, wiring up the pg backend config"
-dir = "{{config_root}}/tofu/testbed"
+[tasks."tofu:testlab:init"]
+description = "tofu init for tofu/testlab, wiring up the pg backend config"
+dir = "{{config_root}}/tofu/testlab"
 run = "tofu init -backend-config=backend.hcl"
 
-[tasks."tofu:testbed:plan"]
-description = "tofu plan for tofu/testbed"
-dir = "{{config_root}}/tofu/testbed"
+[tasks."tofu:testlab:plan"]
+description = "tofu plan for tofu/testlab"
+dir = "{{config_root}}/tofu/testlab"
 run = "tofu plan"
 
-[tasks."tofu:testbed:apply"]
-description = "tofu apply for tofu/testbed"
-dir = "{{config_root}}/tofu/testbed"
+[tasks."tofu:testlab:apply"]
+description = "tofu apply for tofu/testlab"
+dir = "{{config_root}}/tofu/testlab"
 run = "tofu apply"
 
-[tasks."tofu:testbed:validate"]
-description = "validate tofu/testbed config"
-dir = "{{config_root}}/tofu/testbed"
+[tasks."tofu:testlab:validate"]
+description = "validate tofu/testlab config"
+dir = "{{config_root}}/tofu/testlab"
 run = "tofu validate"
 
-[tasks."tofu:testbed:check"]
-description = "check formatting and validity of tofu/testbed configs"
+[tasks."tofu:testlab:check"]
+description = "check formatting and validity of tofu/testlab configs"
 depends = [
-  "tofu:testbed:validate",
+  "tofu:testlab:validate",
 ]
 
 [tasks."tofu:fmt"]
@@ -80,5 +80,5 @@ description = "check formatting and validity of all tofu configs"
 depends = [
   "tofu:fmt-check",
   "tofu:lab:check",
-  "tofu:testbed:check",
+  "tofu:testlab:check",
 ]

@@ -17,7 +17,7 @@ variable "proxmox_insecure" {
 
 variable "op_vault_name" {
   type        = string
-  description = "1Password vault name containing testbed secrets"
+  description = "1Password vault name containing testlab secrets"
 }
 
 variable "op_items" {
@@ -38,25 +38,25 @@ variable "opnsense_allow_insecure" {
 
 variable "vlan_id" {
   type        = number
-  description = "Default VLAN ID for testbed VMs"
+  description = "Default VLAN ID for testlab VMs"
   default     = 60
 }
 
 variable "vm_cores" {
   type        = number
-  description = "Default vCPU cores for testbed VMs"
+  description = "Default vCPU cores for testlab VMs"
   default     = 2
 }
 
 variable "vm_disk_size" {
   type        = string
-  description = "Default disk size for testbed VMs"
+  description = "Default disk size for testlab VMs"
   default     = "32G"
 }
 
 variable "vm_memory" {
   type        = number
-  description = "Default memory (MB) for testbed VMs"
+  description = "Default memory (MB) for testlab VMs"
   default     = 2560
 }
 
