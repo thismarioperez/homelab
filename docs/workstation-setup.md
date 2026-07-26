@@ -44,3 +44,27 @@ mise run tofu:testlab:plan
 ```
 
 At this point the workstation can read/write the same tofu state as every other workstation, with no secret material stored outside 1Password.
+
+## 4. Ansible
+
+Install the collections and load the management SSH key:
+
+```bash
+mise run ansible:install-collections
+mise run ssh:add-key
+```
+
+`ansible/playbooks/group_vars/all.yml` resolves `ansible_user` via the
+`community.general.onepassword` lookup plugin, using the same
+`OP_SERVICE_ACCOUNT_TOKEN` from step 2 — no separate setup needed.
+
+Inventory is read live from `tofu/testlab`'s state via the
+`cloud.terraform.terraform_provider` plugin (`ansible/inventory/tofu_state.yml`)
+— no static inventory to keep in sync. It requires `tofu/testlab` to already
+be initialized (step 3) and applied, since it reads the `ansible_host`
+resources declared in `tofu/testlab/main.tf`:
+
+```bash
+mise run ansible:testlab:inventory   # sanity check: ansible-inventory --graph
+mise run ansible:testlab:ping        # confirm connectivity to all hosts
+```

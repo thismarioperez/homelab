@@ -1,5 +1,25 @@
 provider "onepassword" {}
 
+provider "opnsense" {
+  uri            = var.opnsense_endpoint
+  allow_insecure = var.opnsense_allow_insecure
+  api_key        = local.opnsense_api_fields["api key"].value
+  api_secret     = local.opnsense_api_fields["api secret"].value
+}
+
+provider "proxmox" {
+  endpoint  = var.proxmox_endpoint
+  insecure  = var.proxmox_insecure
+  api_token = "${local.proxmox_api_fields["token ID"].value}=${local.proxmox_api_fields["token secret"].value}"
+
+  ssh {
+    username = data.onepassword_item.secrets["proxmox_ssh"].username
+    password = data.onepassword_item.secrets["proxmox_ssh"].password
+  }
+}
+
+provider "ansible" {}
+
 data "onepassword_vault" "this" {
   name = var.op_vault_name
 }
@@ -18,24 +38,6 @@ locals {
   # `tofu console` or `op item get` if this doesn't resolve.
   proxmox_api_fields  = data.onepassword_item.secrets["proxmox_api"].section_map[""].field_map
   opnsense_api_fields = data.onepassword_item.secrets["opnsense_api"].section_map[""].field_map
-}
-
-provider "proxmox" {
-  endpoint  = var.proxmox_endpoint
-  insecure  = var.proxmox_insecure
-  api_token = "${local.proxmox_api_fields["token ID"].value}=${local.proxmox_api_fields["token secret"].value}"
-
-  ssh {
-    username = data.onepassword_item.secrets["proxmox_ssh"].username
-    password = data.onepassword_item.secrets["proxmox_ssh"].password
-  }
-}
-
-provider "opnsense" {
-  uri            = var.opnsense_endpoint
-  allow_insecure = var.opnsense_allow_insecure
-  api_key        = local.opnsense_api_fields["api key"].value
-  api_secret     = local.opnsense_api_fields["api secret"].value
 }
 
 # The opnsense provider only exposes a get-by-UUID data source for Kea
@@ -125,4 +127,18 @@ module "k3s_vm" {
   username = data.onepassword_item.secrets["vm_login"].username
   password = data.onepassword_item.secrets["vm_login"].password
   ssh_keys = [data.onepassword_item.secrets["vm_ssh_key"].public_key]
+}
+
+resource "ansible_host" "k3s_vm" {
+  count = var.k3s_vm_count
+
+  # depends on the actual VM, not just the reservation, so inventory only
+  # lists hosts that have actually been provisioned
+  depends_on = [module.k3s_vm]
+
+  name   = local.k3s_vm_names[count.index]
+  groups = [count.index == 0 ? "k3s_controllers" : "k3s_workers"]
+  variables = {
+    ansible_host = local.k3s_vm_ips[count.index]
+  }
 }

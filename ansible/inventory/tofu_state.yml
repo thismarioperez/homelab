@@ -1,0 +1,3 @@
+plugin: cloud.terraform.terraform_provider
+binary_path: tofu
+project_path: ../tofu/testlab

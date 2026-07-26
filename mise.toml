@@ -4,6 +4,9 @@ _.file = ".env"
 [tools]
 opentofu = "1.12"
 1password-cli = "latest"
+python = "3"
+pipx = "latest"
+"pipx:ansible" = { version = "14", pipx_args = "--include-deps" }
 
 [tasks."op:whoami"]
 description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
@@ -16,6 +19,21 @@ run = "op read"
 [tasks."ssh:add-key"]
 description = "load the 1Password management ssh key into ssh-agent"
 run = "op read 'op://Home Network/theforce - management ssh key/private key?ssh-format=openssh' | ssh-add -"
+
+[tasks."ansible:install-collections"]
+description = "install ansible collections required by ansible/requirements.yml"
+dir = "{{config_root}}/ansible"
+run = "ansible-galaxy collection install -r requirements.yml"
+
+[tasks."ansible:testlab:inventory"]
+description = "show the ansible inventory for tofu/testlab, sourced live from tofu state"
+dir = "{{config_root}}/ansible"
+run = "ansible-inventory --graph"
+
+[tasks."ansible:testlab:ping"]
+description = "ping all tofu/testlab hosts over ssh"
+dir = "{{config_root}}/ansible"
+run = "ansible-playbook playbooks/ping.yml"
 
 [tasks."tofu:lab:backend"]
 description = "render backend.hcl for tofu/lab from 1Password"
