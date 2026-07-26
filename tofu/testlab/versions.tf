@@ -26,5 +26,9 @@ terraform {
       source  = "ansible/ansible"
       version = "~> 1.2"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
+    }
   }
 }

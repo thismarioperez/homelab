@@ -96,6 +96,10 @@ resource "opnsense_kea_dhcpv4_reservation" "k3s_vm" {
   description = "tofu: tofu/testlab k3s_vm module"
 }
 
+resource "time_rotating" "ubuntu_2404_refresh" {
+  rotation_days = 180
+}
+
 resource "proxmox_download_file" "ubuntu_2404" {
   content_type = "import"
   datastore_id = "local"
@@ -103,6 +107,10 @@ resource "proxmox_download_file" "ubuntu_2404" {
   url          = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
   file_name    = "noble-server-cloudimg-amd64.qcow2"
   overwrite    = false
+
+  lifecycle {
+    replace_triggered_by = [time_rotating.ubuntu_2404_refresh.id]
+  }
 }
 
 module "k3s_vm" {
