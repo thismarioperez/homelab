@@ -10,5 +10,13 @@ terraform {
       source  = "bpg/proxmox"
       version = "~> 0.111"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
+    opnsense = {
+      source  = "browningluke/opnsense"
+      version = "~> 0.11"
+    }
   }
 }
