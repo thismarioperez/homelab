@@ -7,6 +7,8 @@ opentofu = "1.12"
 python = "3"
 pipx = "latest"
 "pipx:ansible" = { version = "14", pipx_args = "--include-deps" }
+"pipx:ansible-lint" = "26"
+"pipx:yamllint" = "latest"
 
 [tasks."op:whoami"]
 description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
@@ -24,6 +26,23 @@ run = "op read 'op://Home Network/theforce - management ssh key/private key?ssh-
 description = "install ansible collections required by ansible/requirements.yml"
 dir = "{{config_root}}/ansible"
 run = "ansible-galaxy collection install -r requirements.yml"
+
+[tasks."ansible:lint"]
+description = "lint ansible playbooks and roles with ansible-lint"
+dir = "{{config_root}}/ansible"
+run = "ansible-lint"
+
+[tasks."ansible:yamllint"]
+description = "check ansible yaml formatting with yamllint"
+dir = "{{config_root}}/ansible"
+run = "yamllint ."
+
+[tasks."ansible:check"]
+description = "check formatting and validity of ansible playbooks and roles"
+depends = [
+  "ansible:yamllint",
+  "ansible:lint",
+]
 
 [tasks."ansible:testlab:inventory"]
 description = "show the ansible inventory for tofu/testlab, sourced live from tofu state"

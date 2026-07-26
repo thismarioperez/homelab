@@ -8,4 +8,6 @@ crash.log
 backend.hcl
 .env
 
+.ansible/
+
 .claude/settings.local.json
