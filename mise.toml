@@ -23,7 +23,7 @@ dir = "{{config_root}}/tofu/lab"
 run = "op inject -i backend.hcl.tpl -o backend.hcl"
 
 [tasks."tofu:lab:init"]
-description = "tofu init for tofu/lab, wiring up the pg backend config"
+description = "tofu init for tofu/lab, wiring up the s3 backend config"
 dir = "{{config_root}}/tofu/lab"
 depends = [
   "tofu:lab:backend",
@@ -57,7 +57,7 @@ dir = "{{config_root}}/tofu/testlab"
 run = "op inject -i backend.hcl.tpl -o backend.hcl"
 
 [tasks."tofu:testlab:init"]
-description = "tofu init for tofu/testlab, wiring up the pg backend config"
+description = "tofu init for tofu/testlab, wiring up the s3 backend config"
 dir = "{{config_root}}/tofu/testlab"
 depends = [
   "tofu:testlab:backend",

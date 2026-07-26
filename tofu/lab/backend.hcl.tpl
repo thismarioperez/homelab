@@ -1,1 +1,2 @@
-conn_str = "op://Home Network/postgres-theforce - tofu/conn_str"
+access_key = "op://Home Network/Backblaze - Application Key - tofu-state/keyID"
+secret_key = "op://Home Network/Backblaze - Application Key - tofu-state/applicationKey"

@@ -29,7 +29,7 @@ mise run op:whoami   # confirms auth works
 
 ## 3. Render the tofu state backend config
 
-`tofu/{lab,testlab}/backend.hcl` holds the Postgres connection string for the shared OpenTofu state backend (see [`postgres-theforce.md`](postgres-theforce.md)). It's gitignored and never committed — instead it's rendered from 1Password on demand:
+`tofu/{lab,testlab}/backend.hcl` holds the Backblaze B2 credentials for the shared OpenTofu state backend (see [`backblaze-b2-tofu-state.md`](backblaze-b2-tofu-state.md)). It's gitignored and never committed — instead it's rendered from 1Password on demand:
 
 ```bash
 mise run tofu:testlab:backend   # renders tofu/testlab/backend.hcl
