@@ -38,9 +38,29 @@ provider "opnsense" {
   api_secret     = local.opnsense_api_fields["api secret"].value
 }
 
+# The opnsense provider only exposes a get-by-UUID data source for Kea
+# subnets, so the search endpoint is called directly here to resolve
+# var.k3s_vm_subnet_cidr to its subnet UUID without a manual lookup.
+data "http" "opnsense_kea_subnets" {
+  url = "${var.opnsense_endpoint}/api/kea/dhcpv4/search_subnet"
+
+  request_headers = {
+    Authorization = "Basic ${base64encode("${local.opnsense_api_fields["api key"].value}:${local.opnsense_api_fields["api secret"].value}")}"
+  }
+
+  insecure = var.opnsense_allow_insecure
+}
+
 locals {
   k3s_vm_names = [for i in range(var.k3s_vm_count) : "k3s-${i == 0 ? "controller" : "worker-${i}"}"]
   k3s_vm_ips   = [for i in range(var.k3s_vm_count) : cidrhost(var.k3s_vm_subnet_cidr, var.k3s_vm_ip_offset + i)]
+  # Kea's "subnet" field is the interface IP (e.g. "10.30.60.1/24"), not the
+  # network address, so it's normalized with cidrsubnet(..., 0, 0) before
+  # comparing to var.k3s_vm_subnet_cidr.
+  opnsense_kea_subnet_id = one([
+    for row in jsondecode(data.http.opnsense_kea_subnets.response_body).rows :
+    row.uuid if cidrsubnet(row.subnet, 0, 0) == var.k3s_vm_subnet_cidr
+  ])
   # 02: locally administered, unicast (IEEE 802 bit convention) — avoids
   # colliding with real vendor OUIs so the MAC is safe to invent locally
   # and reuse for a stable OPNsense DHCP reservation.
@@ -67,7 +87,7 @@ resource "random_id" "k3s_vm_mac" {
 resource "opnsense_kea_dhcpv4_reservation" "k3s_vm" {
   count = var.k3s_vm_count
 
-  subnet_id   = var.opnsense_kea_subnet_id
+  subnet_id   = local.opnsense_kea_subnet_id
   mac_address = local.k3s_vm_macs[count.index]
   ip_address  = local.k3s_vm_ips[count.index]
   hostname    = local.k3s_vm_names[count.index]

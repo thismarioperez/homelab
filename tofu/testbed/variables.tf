@@ -66,11 +66,6 @@ variable "k3s_vm_count" {
   default     = 3
 }
 
-variable "opnsense_kea_subnet_id" {
-  type        = string
-  description = "OPNsense Kea DHCPv4 subnet UUID that var.vlan_id's subnet maps to (find via GET /api/kea/dhcpv4/search_subnet, or the docs/collections/OPNsense Bruno collection)"
-}
-
 variable "k3s_vm_subnet_cidr" {
   type        = string
   description = "CIDR of the subnet backing var.vlan_id, used to compute static reservation IPs for the k3s VMs"

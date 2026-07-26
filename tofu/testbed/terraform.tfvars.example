@@ -3,7 +3,6 @@ proxmox_endpoint        = "https://<proxmox-host>:8006/"
 proxmox_insecure        = false
 opnsense_endpoint       = "https://<opnsense-host>"
 opnsense_allow_insecure = false
-opnsense_kea_subnet_id  = "<subnet uuid, from GET /api/kea/dhcpv4/search_subnet>"
 op_vault_name           = "<vault>"
 op_items = {
   vm_login     = "<item title>"
