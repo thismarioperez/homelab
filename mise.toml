@@ -91,11 +91,13 @@ depends = [
 [tasks."tofu:testlab:backend"]
 description = "render backend.hcl for tofu/testlab from 1Password"
 dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "op inject -i backend.hcl.tpl -o backend.hcl"
 
 [tasks."tofu:testlab:init"]
 description = "tofu init for tofu/testlab, wiring up the s3 backend config"
 dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 depends = [
   "tofu:testlab:backend",
 ]
@@ -104,16 +106,19 @@ run = "tofu init -backend-config=backend.hcl"
 [tasks."tofu:testlab:plan"]
 description = "tofu plan for tofu/testlab"
 dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "tofu plan"
 
 [tasks."tofu:testlab:apply"]
 description = "tofu apply for tofu/testlab"
 dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "tofu apply"
 
 [tasks."tofu:testlab:validate"]
 description = "validate tofu/testlab config"
 dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "tofu validate"
 
 [tasks."tofu:testlab:check"]
