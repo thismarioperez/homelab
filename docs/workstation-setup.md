@@ -45,6 +45,21 @@ mise run tofu:testlab:plan
 
 At this point the workstation can read/write the same tofu state as every other workstation, with no secret material stored outside 1Password.
 
-## 4. Configure `ansible_user` lookup (if using ansible)
+## 4. Install ansible collections
 
-`ansible/group_vars/all.yml` resolves `ansible_user` via the `community.general.onepassword` lookup plugin — this uses the same `OP_SERVICE_ACCOUNT_TOKEN` from step 2, no separate setup needed.
+```bash
+cd ansible
+ansible-galaxy collection install -r requirements.yml
+```
+
+`ansible/group_vars/all.yml` resolves `ansible_user` via the `community.general.onepassword` lookup plugin, using the same `OP_SERVICE_ACCOUNT_TOKEN` from step 2 — no separate setup needed.
+
+## 5. Inventory
+
+Hosts are read live from `tofu/testlab`'s state (`ansible/inventory.terraform_state.yml`, the `cloud.terraform.terraform_state` plugin) — no static inventory file to keep in sync. It renders the same `tofu/testlab/backend.hcl` from step 3, so nothing further to configure once that exists.
+
+```bash
+ansible-inventory --graph   # sanity check from ansible/
+```
+
+**Known limitation:** `ansible/inventory.terraform_state.yml` and `ansible/bin/tofu` hardcode `/home/mario/Repositories/homelab` (the plugin doesn't support Jinja templating in its config — see the comments in that file). If this repo is ever cloned to a different path or by a different user, update both files' absolute paths, and keep `ansible/bin/tofu`'s `opentofu@` version pin in sync with `mise.toml`.

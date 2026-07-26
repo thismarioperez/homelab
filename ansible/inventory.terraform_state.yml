@@ -1,0 +1,39 @@
+---
+# NOTE: this plugin reads its config as raw YAML with no Jinja templating
+# (cloud.terraform.terraform_state calls _read_config_data() directly, never
+# self.templar.template()), so every path below must be a literal absolute
+# path, not a `{{ ... }}` expression. Adjust if this repo is ever cloned
+# somewhere other than /home/mario/Repositories/homelab.
+plugin: cloud.terraform.terraform_state
+# The plugin runs the binary from its own temporary directory (no mise.toml
+# there), so a bare mise shim can't resolve a version there. bin/tofu wraps
+# `mise exec opentofu@<version>` to pin the version explicitly, without
+# changing the plugin's temp-dir cwd the way `mise exec -C <dir>` would.
+binary_path: /home/mario/Repositories/homelab/ansible/bin/tofu
+backend_type: pg
+backend_config_files:
+  - /home/mario/Repositories/homelab/tofu/testlab/backend.hcl
+# tofu/testlab/backend.tf pins this state to the "testlab" pg schema; the
+# plugin only sees backend_config[_files], not that file, so it must be
+# repeated here or it'll default to (and fail against) the "public" schema.
+backend_config:
+  schema_name: testlab
+
+# The Proxmox VM resource (module.k3s_vm[*].proxmox_virtual_environment_vm)
+# only gets a DHCP-assigned address; the actual static IP/hostname pairing
+# lives on the OPNsense Kea reservation created alongside it in
+# tofu/testlab/main.tf, so source hosts from that resource type instead.
+provider_mapping:
+  - provider_name: registry.opentofu.org/browningluke/opnsense
+    types:
+      - opnsense_kea_dhcpv4_reservation
+
+hostnames:
+  - hostname
+
+compose:
+  ansible_host: ip_address
+
+groups:
+  k3s_controllers: "'controller' in hostname"
+  k3s_workers: "'worker' in hostname"
