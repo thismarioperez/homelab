@@ -1,3 +1,6 @@
+- name: Wait for hosts to be ready for Ansible
+  ansible.builtin.import_playbook: wait_for_ready.yml
+
 - name: Full upgrade apt packages
   hosts: all
   become: true
