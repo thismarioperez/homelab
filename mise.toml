@@ -4,6 +4,9 @@ _.file = ".env"
 [tools]
 opentofu = "1.12"
 1password-cli = "latest"
+python = "3"
+pipx = "latest"
+"pipx:ansible" = { version = "latest", pipx_args = "--include-deps" }
 
 [tasks."op:whoami"]
 description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
@@ -12,6 +15,10 @@ run = "op whoami"
 [tasks."op:read"]
 description = "read a secret from 1Password, e.g. mise run op:read -- op://vault/item/field"
 run = "op read"
+
+[tasks."ssh:add-key"]
+description = "load the 1Password management ssh key into ssh-agent"
+run = "op read 'op://Home Network/theforce - management ssh key/private key?ssh-format=openssh' | ssh-add -"
 
 [tasks."tofu:lab:init"]
 description = "tofu init for tofu/lab, wiring up the pg backend config"
