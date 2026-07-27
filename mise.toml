@@ -3,6 +3,7 @@ _.file = ".env"
 
 [tools]
 opentofu = "1.12"
+kubectl = "1.36"
 1password-cli = "latest"
 python = "3"
 pipx = "latest"
@@ -58,6 +59,11 @@ run = "ansible-playbook playbooks/ping.yml"
 description = "full-upgrade apt packages on all tofu/testlab hosts, rebooting if required"
 dir = "{{config_root}}/ansible"
 run = "ansible-playbook playbooks/ubuntu_upgrade.yml"
+
+[tasks."ansible:testlab:k3s-install"]
+description = "provision k3s on all tofu/testlab hosts (k3s-io/k3s-ansible)"
+dir = "{{config_root}}/ansible"
+run = "ansible-playbook playbooks/k3s_install.yml"
 
 [tasks."tofu:lab:backend"]
 description = "render backend.hcl for tofu/lab from 1Password"

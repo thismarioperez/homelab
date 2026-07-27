@@ -1,0 +1,5 @@
+- name: Wait for hosts to be ready for Ansible
+  ansible.builtin.import_playbook: wait_for_ready.yml
+
+- name: Import k3s-ansible cluster provisioning playbook
+  ansible.builtin.import_playbook: k3s.orchestration.site

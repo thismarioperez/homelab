@@ -1,0 +1,15 @@
+---
+# Aliases the tofu-generated k3s_controllers/k3s_workers groups (see
+# tofu/testlab/main.tf's ansible_host resource) to the server/agent group
+# names that k3s-io/k3s-ansible's playbooks expect, without duplicating or
+# renaming the underlying hosts.
+all:
+  children:
+    k3s_cluster:
+      children:
+        server:
+          children:
+            k3s_controllers: {}
+        agent:
+          children:
+            k3s_workers: {}
