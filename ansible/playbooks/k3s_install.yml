@@ -3,3 +3,6 @@
 
 - name: Import k3s-ansible cluster provisioning playbook
   ansible.builtin.import_playbook: k3s.orchestration.site
+
+- name: Install and configure MetalLB
+  ansible.builtin.import_playbook: k3s_metallb_install.yml

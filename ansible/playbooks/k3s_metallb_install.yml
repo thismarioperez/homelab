@@ -1,0 +1,65 @@
+- name: Fetch k3s kubeconfig from the controller
+  hosts: k3s_controllers[0]
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Fetch kubeconfig to the control node
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ playbook_dir }}/../.cache/testlab-kubeconfig.yaml"
+        flat: true
+
+- name: Install and configure MetalLB via Helm
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    kubeconfig_path: "{{ playbook_dir }}/../.cache/testlab-kubeconfig.yaml"
+    ipaddresspool_path: "{{ playbook_dir }}/../.cache/metallb-ipaddresspool.yml"
+    api_endpoint: "{{ hostvars[groups['k3s_controllers'][0]]['ansible_host'] }}"
+    k3s_lb_ip: "{{ hostvars[groups['k3s_controllers'][0]]['k3s_lb_ip'] }}"
+    metallb_chart_version: "{{ hostvars[groups['k3s_controllers'][0]]['metallb_chart_version'] }}"
+  tasks:
+    # k3s writes the kubeconfig pointing at 127.0.0.1, which only resolves on
+    # the controller itself; helm/kubectl run here on localhost instead.
+    - name: Point kubeconfig at the controller's real address
+      ansible.builtin.replace:
+        path: "{{ kubeconfig_path }}"
+        regexp: 'https://127\.0\.0\.1:6443'
+        replace: "https://{{ api_endpoint }}:6443"
+
+    - name: Add the MetalLB helm repo
+      ansible.builtin.command: helm repo add metallb https://metallb.github.io/metallb
+      changed_when: false
+
+    - name: Install/upgrade MetalLB
+      ansible.builtin.command: >
+        helm upgrade --install metallb metallb/metallb
+        --version {{ metallb_chart_version }}
+        --namespace metallb-system --create-namespace
+        --kubeconfig {{ kubeconfig_path }}
+        --wait
+      register: metallb_helm
+      changed_when: "'has been upgraded' in metallb_helm.stdout or 'has been installed' in metallb_helm.stdout"
+
+    - name: Render MetalLB IPAddressPool and L2Advertisement
+      ansible.builtin.template:
+        src: metallb-ipaddresspool.yml.j2
+        dest: "{{ ipaddresspool_path }}"
+        mode: "0644"
+
+    - name: Apply MetalLB address pool config
+      ansible.builtin.command: >
+        kubectl --kubeconfig {{ kubeconfig_path }} apply -f {{ ipaddresspool_path }}
+      register: metallb_apply
+      changed_when: "'unchanged' not in metallb_apply.stdout"
+
+    - name: Wait for Traefik's LoadBalancer Service to get the MetalLB IP
+      ansible.builtin.command: >
+        kubectl --kubeconfig {{ kubeconfig_path }} -n kube-system get svc traefik
+        -o jsonpath={.status.loadBalancer.ingress[0].ip}
+      register: traefik_lb_ip
+      until: traefik_lb_ip.stdout == k3s_lb_ip
+      retries: 12
+      delay: 5
+      changed_when: false

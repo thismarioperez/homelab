@@ -9,5 +9,6 @@ backend.hcl
 .env
 
 .ansible/
+ansible/.cache/
 
 .claude/settings.local.json

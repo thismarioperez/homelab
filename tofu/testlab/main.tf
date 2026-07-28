@@ -96,6 +96,28 @@ resource "opnsense_kea_dhcpv4_reservation" "k3s_vm" {
   description = "tofu: tofu/testlab k3s_vm module"
 }
 
+# Kea has no IPv4 pool-exclusion primitive, but a host reservation is
+# excluded from the dynamic pool regardless of whether any device ever
+# claims it — so a reservation to a synthetic, never-requesting MAC
+# reserves var.k3s_lb_ip for MetalLB without any real device attached.
+resource "random_id" "k3s_lb_mac" {
+  byte_length = 5
+
+  keepers = {
+    purpose = "k3s_lb"
+  }
+}
+
+resource "opnsense_kea_dhcpv4_reservation" "k3s_lb" {
+  subnet_id = local.opnsense_kea_subnet_id
+  mac_address = "02:${join(":", [
+    for b in range(5) : substr(random_id.k3s_lb_mac.hex, b * 2, 2)
+  ])}"
+  ip_address  = var.k3s_lb_ip
+  hostname    = "k8s-lb"
+  description = "tofu: tofu/testlab MetalLB LoadBalancer IP exclusion — not a real device"
+}
+
 resource "time_rotating" "ubuntu_2404_refresh" {
   rotation_days = 180
 }

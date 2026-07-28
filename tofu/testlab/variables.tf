@@ -75,5 +75,11 @@ variable "k3s_vm_subnet_cidr" {
 variable "k3s_vm_ip_offset" {
   type        = number
   description = "Host offset (from the subnet's network address) of the first k3s VM's reserved IP; each subsequent VM gets the next offset. Must stay outside the subnet's DHCP dynamic pool"
-  default     = 10
+  default     = 20
+}
+
+variable "k3s_lb_ip" {
+  type        = string
+  description = "IP address reserved (excluded from the DHCP dynamic pool) for MetalLB to announce as the cluster's single LoadBalancer address. Must stay outside the subnet's DHCP dynamic pool and not collide with other static reservations"
+  default     = "10.30.60.10"
 }
