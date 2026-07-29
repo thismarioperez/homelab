@@ -70,7 +70,7 @@
         --version {{ metallb_chart_version }}
         --namespace metallb-system --create-namespace
         --kubeconfig {{ kubeconfig_path }}
-        --wait
+        --wait --timeout 10m0s
       register: metallb_helm
       changed_when: "'has been upgraded' in metallb_helm.stdout or 'has been installed' in metallb_helm.stdout"
 
