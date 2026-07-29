@@ -1,0 +1,19 @@
+# Unlike k3s_install.yml, this doesn't need forks=1: k3s.orchestration.reset
+# is a flat play per-host (k3s-uninstall.sh / k3s-agent-uninstall.sh) with no
+# serial etcd-join race to guard against.
+
+- name: Wait for hosts to be ready for Ansible
+  ansible.builtin.import_playbook: wait_for_ready.yml
+
+# Also removes MetalLB and the kube-vip static pod/RBAC manifest, since all
+# of it lives under /var/lib/rancher/k3s and this wipes that directory
+# wholesale.
+- name: Import k3s-ansible cluster reset playbook
+  ansible.builtin.import_playbook: k3s.orchestration.reset
+
+- name: Reboot hosts to clear any leftover k3s network/mount state
+  hosts: k3s_cluster
+  become: true
+  tasks:
+    - name: Reboot
+      ansible.builtin.reboot:
