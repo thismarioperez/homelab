@@ -1,3 +1,8 @@
+output "k3s_apiserver_vip" {
+  description = "IP address reserved for kube-vip to announce as the k3s control plane's floating apiserver address"
+  value       = var.k3s_apiserver_vip
+}
+
 output "k3s_lb_ip" {
   description = "IP address reserved for MetalLB to announce as the k3s cluster's LoadBalancer address"
   value       = var.k3s_lb_ip

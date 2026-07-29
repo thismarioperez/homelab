@@ -54,8 +54,12 @@ data "http" "opnsense_kea_subnets" {
 }
 
 locals {
-  k3s_vm_names = [for i in range(var.k3s_vm_count) : "k3s-${i == 0 ? "controller" : "worker-${i}"}"]
-  k3s_vm_ips   = [for i in range(var.k3s_vm_count) : cidrhost(var.k3s_vm_subnet_cidr, var.k3s_vm_ip_offset + i)]
+  k3s_vm_ips = concat(var.k3s_controller_ips, var.k3s_worker_ips)
+  k3s_vm_names = concat(
+    [for i in range(length(var.k3s_controller_ips)) : "k3s-controller-${i + 1}"],
+    [for i in range(length(var.k3s_worker_ips)) : "k3s-worker-${i + 1}"],
+  )
+  k3s_vm_count = length(local.k3s_vm_ips)
   # Kea's "subnet" field is the interface IP (e.g. "10.30.60.1/24"), not the
   # network address, so it's normalized with cidrsubnet(..., 0, 0) before
   # comparing to var.k3s_vm_subnet_cidr.
@@ -65,15 +69,25 @@ locals {
   ])
   # 02: locally administered, unicast (IEEE 802 bit convention) — avoids
   # colliding with real vendor OUIs so the MAC is safe to invent locally
-  # and reuse for a stable OPNsense DHCP reservation.
-  k3s_vm_macs = [
-    for id in random_id.k3s_vm_mac :
-    "02:${join(":", [for b in range(5) : substr(id.hex, b * 2, 2)])}"
-  ]
+  # and reuse for a stable OPNsense DHCP reservation. Centralized here so
+  # every random_id.*.hex → MAC conversion (per-VM, LB, apiserver VIP) shares
+  # one formatting expression instead of repeating it per resource.
+  mac_from_hex          = { for name, hex in local.mac_source_hex : name => "02:${join(":", [for b in range(5) : substr(hex, b * 2, 2)])}" }
+  k3s_vm_macs           = [for i in range(local.k3s_vm_count) : local.mac_from_hex["vm-${i}"]]
+  k3s_lb_mac            = local.mac_from_hex["lb"]
+  k3s_apiserver_vip_mac = local.mac_from_hex["apiserver_vip"]
+
+  mac_source_hex = merge(
+    { for i, id in random_id.k3s_vm_mac : "vm-${i}" => id.hex },
+    {
+      lb            = random_id.k3s_lb_mac.hex
+      apiserver_vip = random_id.k3s_apiserver_vip_mac.hex
+    },
+  )
 }
 
 resource "random_id" "k3s_vm_mac" {
-  count = var.k3s_vm_count
+  count = local.k3s_vm_count
 
   byte_length = 5
 
@@ -87,7 +101,7 @@ resource "random_id" "k3s_vm_mac" {
 # *before* the VM's first boot requests a DHCP lease, otherwise the VM picks
 # up a dynamic-pool address instead of the reserved one.
 resource "opnsense_kea_dhcpv4_reservation" "k3s_vm" {
-  count = var.k3s_vm_count
+  count = local.k3s_vm_count
 
   subnet_id   = local.opnsense_kea_subnet_id
   mac_address = local.k3s_vm_macs[count.index]
@@ -109,13 +123,30 @@ resource "random_id" "k3s_lb_mac" {
 }
 
 resource "opnsense_kea_dhcpv4_reservation" "k3s_lb" {
-  subnet_id = local.opnsense_kea_subnet_id
-  mac_address = "02:${join(":", [
-    for b in range(5) : substr(random_id.k3s_lb_mac.hex, b * 2, 2)
-  ])}"
+  subnet_id   = local.opnsense_kea_subnet_id
+  mac_address = local.k3s_lb_mac
   ip_address  = var.k3s_lb_ip
   hostname    = "k8s-lb"
   description = "tofu: tofu/testlab MetalLB LoadBalancer IP exclusion — not a real device"
+}
+
+# Same synthetic-MAC exclusion pattern as k3s_lb, reserving
+# var.k3s_apiserver_vip for kube-vip to announce as the k3s control plane's
+# floating apiserver address.
+resource "random_id" "k3s_apiserver_vip_mac" {
+  byte_length = 5
+
+  keepers = {
+    purpose = "k3s_apiserver_vip"
+  }
+}
+
+resource "opnsense_kea_dhcpv4_reservation" "k3s_apiserver_vip" {
+  subnet_id   = local.opnsense_kea_subnet_id
+  mac_address = local.k3s_apiserver_vip_mac
+  ip_address  = var.k3s_apiserver_vip
+  hostname    = "k8s-apiserver-vip"
+  description = "tofu: tofu/testlab kube-vip k3s apiserver VIP exclusion — not a real device"
 }
 
 resource "time_rotating" "ubuntu_2404_refresh" {
@@ -136,7 +167,7 @@ resource "proxmox_download_file" "ubuntu_2404" {
 }
 
 module "k3s_vm" {
-  count  = var.k3s_vm_count
+  count  = local.k3s_vm_count
   source = "../modules/ubuntu-vm"
 
   # Explicit: the mac_address/ip_config inputs below don't reference the
@@ -160,14 +191,14 @@ module "k3s_vm" {
 }
 
 resource "ansible_host" "k3s_vm" {
-  count = var.k3s_vm_count
+  count = local.k3s_vm_count
 
   # depends on the actual VM, not just the reservation, so inventory only
   # lists hosts that have actually been provisioned
   depends_on = [module.k3s_vm]
 
   name   = local.k3s_vm_names[count.index]
-  groups = [count.index == 0 ? "k3s_controllers" : "k3s_workers"]
+  groups = [count.index < length(var.k3s_controller_ips) ? "k3s_controllers" : "k3s_workers"]
   variables = {
     ansible_host = local.k3s_vm_ips[count.index]
   }

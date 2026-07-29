@@ -60,26 +60,32 @@ variable "vm_memory" {
   default     = 2560
 }
 
-variable "k3s_vm_count" {
-  type        = number
-  description = "Number of k3 nodes"
-  default     = 3
-}
-
 variable "k3s_vm_subnet_cidr" {
   type        = string
-  description = "CIDR of the subnet backing var.vlan_id, used to compute static reservation IPs for the k3s VMs"
+  description = "CIDR of the subnet backing var.vlan_id, used to resolve the OPNsense Kea subnet for k3s VM/VIP DHCP reservations"
   default     = "10.30.60.0/24"
 }
 
-variable "k3s_vm_ip_offset" {
-  type        = number
-  description = "Host offset (from the subnet's network address) of the first k3s VM's reserved IP; each subsequent VM gets the next offset. Must stay outside the subnet's DHCP dynamic pool"
-  default     = 20
+variable "k3s_apiserver_vip" {
+  type        = string
+  description = "IP address reserved (excluded from the DHCP dynamic pool) for kube-vip to announce as the k3s control plane's floating apiserver address. Must stay outside the subnet's DHCP dynamic pool and not collide with other static reservations"
+  default     = "10.30.60.10"
 }
 
 variable "k3s_lb_ip" {
   type        = string
   description = "IP address reserved (excluded from the DHCP dynamic pool) for MetalLB to announce as the cluster's single LoadBalancer address. Must stay outside the subnet's DHCP dynamic pool and not collide with other static reservations"
-  default     = "10.30.60.10"
+  default     = "10.30.60.11"
+}
+
+variable "k3s_controller_ips" {
+  type        = list(string)
+  description = "Static IPs to reserve for k3s controller (server) nodes, one per node; list length determines the controller count"
+  default     = ["10.30.60.12", "10.30.60.13", "10.30.60.14"]
+}
+
+variable "k3s_worker_ips" {
+  type        = list(string)
+  description = "Static IPs to reserve for k3s worker (agent) nodes, one per node; list length determines the worker count"
+  default     = ["10.30.60.15", "10.30.60.16"]
 }
