@@ -2,9 +2,15 @@
   hosts: all
   gather_facts: false
   tasks:
+    - name: Ping to check if hosts are already reachable
+      ansible.builtin.ping:
+      ignore_errors: true
+      register: initial_ping
+
     - name: Wait for SSH to come up
       ansible.builtin.wait_for_connection:
         timeout: 300
+      when: initial_ping is failed
 
     - name: Wait for cloud-init to finish
       ansible.builtin.raw: cloud-init status --wait
