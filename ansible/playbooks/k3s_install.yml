@@ -1,5 +1,38 @@
+# Always run this playbook with forks=1 (see mise task
+# ansible:testlab:k3s-install, which sets ANSIBLE_FORKS=1). k3s.orchestration
+# .site's server play has no `serial`, so with default forks the controllers
+# race each other to join etcd — a long-standing upstream k3s limitation
+# (k3s-io/k3s#4335, k3s-io/k3s#12794) that k3s-ansible itself works around
+# the same way for upgrades. Without forks=1 you'll see controllers fail to
+# join on first run (they usually self-heal via systemd's
+# Restart=on-failure, but the play still reports failures and downstream
+# steps can hit a half-Ready cluster).
+#
+# The guard below only catches ANSIBLE_FORKS/ansible.cfg — a bare
+# `--forks=1` CLI flag isn't visible to the config lookup, so it wouldn't be
+# caught here. Always go through the mise task rather than passing the flag
+# directly.
+- name: Guard against running without forks=1
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Assert that forks is set to 1
+      ansible.builtin.assert:
+        that:
+          - lookup('ansible.builtin.config', 'DEFAULT_FORKS') | int == 1
+        fail_msg: >-
+          This playbook must be run with forks=1 to avoid a controller etcd
+          join race (see comment at the top of this file). Run it via
+          `mise run ansible:testlab:k3s-install`, or set ANSIBLE_FORKS=1
+          yourself.
+        success_msg: "forks=1 confirmed"
+
 - name: Wait for hosts to be ready for Ansible
   ansible.builtin.import_playbook: wait_for_ready.yml
+
+- name: Bootstrap kube-vip on k3s controllers before k3s starts
+  ansible.builtin.import_playbook: k3s_vip_install.yml
 
 - name: Import k3s-ansible cluster provisioning playbook
   ansible.builtin.import_playbook: k3s.orchestration.site

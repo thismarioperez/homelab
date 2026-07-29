@@ -1,14 +1,25 @@
 k3s_version: "v1.36.2+k3s1"
 token: "{{ lookup('community.general.onepassword', 'testlab - k3s cluster token', field='password', vault='Home Network') }}"
-api_endpoint: "{{ hostvars[groups['server'][0]]['ansible_host'] | default(groups['server'][0]) }}"
 
-# MetalLB replaces k3s's built-in Klipper servicelb, which just DNAT-forwards
-# a node's own IP rather than handing out a dedicated LoadBalancer address.
-#
 # tf_output's binary_path option is type: path, so a bare "tofu" resolves
 # relative to the playbook's basedir instead of searching $PATH — pass the
 # resolved absolute path instead.
 tofu_binary_path: "{{ lookup('ansible.builtin.pipe', 'command -v tofu') }}"
+k3s_apiserver_vip: "{{ lookup('cloud.terraform.tf_output', 'k3s_apiserver_vip', project_path='../tofu/testlab', binary_path=tofu_binary_path) }}"
+
+# kube-vip fronts the 3 controllers with a single floating IP (see
+# playbooks/k3s_vip_install.yml), so cluster access survives any one
+# controller going down instead of hardcoding groups['server'][0].
+api_endpoint: "{{ k3s_apiserver_vip }}"
+
+# MetalLB replaces k3s's built-in Klipper servicelb, which just DNAT-forwards
+# a node's own IP rather than handing out a dedicated LoadBalancer address.
 k3s_lb_ip: "{{ lookup('cloud.terraform.tf_output', 'k3s_lb_ip', project_path='../tofu/testlab', binary_path=tofu_binary_path) }}"
-extra_server_args: "--disable servicelb"
+
+# --tls-san covers the kube-vip VIP in the apiserver's TLS cert, since
+# clients (kubectl/helm) connect via the VIP rather than a node's own IP.
+extra_server_args: "--tls-san {{ k3s_apiserver_vip }} --disable servicelb"
 metallb_chart_version: "0.16.1"
+
+kube_vip_version: "v1.2.1"
+k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml

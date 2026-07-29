@@ -65,6 +65,7 @@ run = "ansible-playbook playbooks/ubuntu_upgrade.yml"
 [tasks."ansible:testlab:k3s-install"]
 description = "provision k3s on all tofu/testlab hosts (k3s-io/k3s-ansible)"
 dir = "{{config_root}}/ansible"
+env = { ANSIBLE_FORKS = "1" }
 run = "ansible-playbook playbooks/k3s_install.yml"
 
 [tasks."kubernetes:testlab:apply"]
