@@ -15,7 +15,8 @@ provisioned with OpenTofu, configured with Ansible.
 ## Goals
 
 - [x] Finish testlab k3s cluster
-- [ ] Setup HA testlab k3s cluster
+- [x] Setup HA testlab k3s cluster
+- [ ] Improve `testlab` tofu project structure
 - [ ] Expand Ansible playbooks
 - [ ] Take inventory of existing snowflake nodes in Lab
 - [ ] Create K3s cluster in Lab
