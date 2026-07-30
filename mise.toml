@@ -76,17 +76,17 @@ run = "ansible-playbook playbooks/k3s_uninstall.yml"
 [tasks."kubernetes:testlab:apply"]
 description = "apply kubernetes manifests to the tofu/testlab k3s cluster"
 dir = "{{config_root}}/kubernetes"
-run = "kubectl apply -k testlab"
+run = "kubectl kustomize testlab --enable-helm | kubectl apply -f -"
 
 [tasks."kubernetes:testlab:diff"]
 description = "diff kubernetes manifests against the tofu/testlab k3s cluster"
 dir = "{{config_root}}/kubernetes"
-run = "kubectl diff -k testlab"
+run = "kubectl kustomize testlab --enable-helm | kubectl diff -f -"
 
 [tasks."kubernetes:testlab:delete"]
 description = "delete kubernetes manifests from the tofu/testlab k3s cluster"
 dir = "{{config_root}}/kubernetes"
-run = "kubectl delete -k testlab"
+run = "kubectl kustomize testlab --enable-helm | kubectl delete -f -"
 
 [tasks."kubernetes:yamllint"]
 description = "check kubernetes yaml formatting with yamllint"
@@ -96,7 +96,7 @@ run = "yamllint ."
 [tasks."kubernetes:testlab:validate"]
 description = "validate rendered kubernetes manifests for tofu/testlab against the k8s schema"
 dir = "{{config_root}}/kubernetes"
-run = "kubectl kustomize testlab | kubeconform -strict -kubernetes-version 1.36.0 -summary"
+run = "kubectl kustomize testlab --enable-helm | kubeconform -strict -kubernetes-version 1.36.0 -summary"
 
 [tasks."kubernetes:check"]
 description = "check formatting and validity of kubernetes manifests"

@@ -12,3 +12,5 @@ backend.hcl
 ansible/.cache/
 
 .claude/settings.local.json
+
+kubernetes/**/charts/

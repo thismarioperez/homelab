@@ -5,3 +5,4 @@ namespace: testlab
 
 resources:
   - namespace.yaml
+  - apps/snapdrop

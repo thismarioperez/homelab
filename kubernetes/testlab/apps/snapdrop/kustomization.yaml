@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+  - name: snapdrop
+    repo: oci://oci.trueforge.org/truecharts
+    version: 13.7.0
+    releaseName: snapdrop
+    namespace: testlab
+
+resources:
+  - ingress.yaml
