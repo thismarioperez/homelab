@@ -6,14 +6,14 @@ Bruno collection for calling the OPNsense router's REST API.
 
 1. Open this folder (`docs/collections/OPNsense/`) as a collection in the
    [Bruno](https://www.usebruno.com/) app.
-2. In Bruno, select the **default** environment from the environment dropdown
+1. In Bruno, select the **default** environment from the environment dropdown
    (top right). It's the only environment defined, so this is a one-time pick
    per collection open — every request inherits its `api_url`/auth from there.
-3. Open the **default** environment's settings and fill in the `api_key` and
+1. Open the **default** environment's settings and fill in the `api_key` and
    `api_secret` secret variables directly in the Bruno UI. Generate a
    key/secret pair in the OPNsense UI under **System → Access → Users →
    (your user) → API keys**.
-4. Run any request — `core/system/status` is a good first check that the API
+1. Run any request — `core/system/status` is a good first check that the API
    is reachable.
 
 `api_key`/`api_secret` are marked as secret variables, so Bruno stores them

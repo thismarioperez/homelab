@@ -12,7 +12,7 @@ pipx = "latest"
 "pipx:ansible" = { version = "14", pipx_args = "--include-deps" }
 "pipx:ansible-lint" = "26"
 "pipx:yamllint" = "latest"
-"pipx:mdformat" = "latest"
+"pipx:mdformat" = { version = "1.0.0", pipx_args = "--preinstall mdformat-gfm==1.0.0" }
 
 [tasks."op:whoami"]
 description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
@@ -199,8 +199,8 @@ depends = [
 
 [tasks."markdown:fmt"]
 description = "format all markdown files with mdformat"
-run = "mdformat ."
+run = "mdformat --exclude '**/.terraform/**' ."
 
 [tasks."markdown:fmt-check"]
 description = "check markdown formatting without modifying files"
-run = "mdformat --check ."
+run = "mdformat --exclude '**/.terraform/**' --check ."

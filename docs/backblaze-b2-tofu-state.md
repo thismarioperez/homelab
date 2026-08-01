@@ -41,11 +41,11 @@ immediately into 1Password.
 Stored in the `Home Network` 1Password vault as item
 **`Backblaze - Application Key - tofu-state`**, with fields:
 
-| Field             | Maps to (S3 backend) |
-|-------------------|-----------------------|
-| `keyID`           | `access_key`          |
-| `keyName`         | (not used by tofu — just the key's human-readable label) |
-| `applicationKey`  | `secret_key`          |
+| Field            | Maps to (S3 backend)                                     |
+| ---------------- | -------------------------------------------------------- |
+| `keyID`          | `access_key`                                             |
+| `keyName`        | (not used by tofu — just the key's human-readable label) |
+| `applicationKey` | `secret_key`                                             |
 
 `tofu/{lab,testlab}/backend.hcl.tpl` reference `keyID`/`applicationKey` via
 `op://` paths, rendered into a gitignored `backend.hcl` — see
