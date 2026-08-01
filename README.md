@@ -11,6 +11,7 @@ provisioned with OpenTofu, configured with Ansible.
 - [Backblaze B2 Tofu state backend](docs/backblaze-b2-tofu-state.md)
 - [OPNsense Bruno collection](docs/collections/OPNsense/README.md) — for
   exploring the OPNsense router's REST API
+- [Hardware](docs/hardware.md) — physical devices in the lab
 
 ## Goals
 
