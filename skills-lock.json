@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "homelab-network-readiness": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/homelab-network-readiness/SKILL.md",
+      "computedHash": "d7aa9716485ced92d5ef32da9a3f62c40cecf7c215b9ff4c61fb4f9b79ddda90"
+    },
+    "homelab-network-setup": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/homelab-network-setup/SKILL.md",
+      "computedHash": "5f1f2c87205c863a6405f678f418a3a5b3ff88cf627714a8cba19e82b2f4af12"
+    },
+    "homelab-pihole-dns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/homelab-pihole-dns/SKILL.md",
+      "computedHash": "2847910fe4de789629f604bf0a3bca11154dfa7db7d6c9bf2552510bd31c1f90"
+    },
+    "homelab-vlan-segmentation": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/homelab-vlan-segmentation/SKILL.md",
+      "computedHash": "9c367bfc470dfdef6dc7f70c42c69756d4b330b9892249d61369265d1431e9f3"
+    },
+    "kubernetes-specialist": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/kubernetes-specialist/SKILL.md",
+      "computedHash": "9c5eb68fc9d553ee29e745258bc6198563158c4b2c57436d63647e61010b5f0a"
+    }
+  }
+}
