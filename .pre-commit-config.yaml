@@ -1,0 +1,38 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: tofu-fmt-check
+        name: tofu fmt-check
+        entry: mise run tofu:fmt-check
+        language: system
+        files: ^tofu/.*\.tf$
+        pass_filenames: false
+
+      - id: kubernetes-yamllint
+        name: kubernetes yamllint
+        entry: mise run kubernetes:yamllint
+        language: system
+        files: ^kubernetes/
+        pass_filenames: false
+
+      - id: ansible-check
+        name: ansible check (yamllint + ansible-lint)
+        entry: mise run ansible:check
+        language: system
+        files: ^ansible/
+        pass_filenames: false
+
+      - id: markdown-fmt-check
+        name: markdown fmt-check
+        entry: mise run markdown:fmt-check
+        language: system
+        files: \.md$
+        pass_filenames: false

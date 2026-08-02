@@ -1,4 +1,6 @@
 extends: default
+ignore: |
+  .cache/
 rules:
   comments:
     min-spaces-from-content: 1
