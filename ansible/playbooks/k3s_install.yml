@@ -31,6 +31,16 @@
 - name: Wait for hosts to be ready for Ansible
   ansible.builtin.import_playbook: wait_for_ready.yml
 
+- name: Install NFS client tools for NFS-backed persistent storage
+  hosts: k3s_cluster
+  become: true
+  tasks:
+    - name: Install nfs-common
+      ansible.builtin.apt:
+        name: nfs-common
+        state: present
+        update_cache: true
+
 - name: Bootstrap kube-vip on k3s controllers before k3s starts
   ansible.builtin.import_playbook: k3s_vip_install.yml
 
