@@ -1,0 +1,82 @@
+- name: Enable Traefik's Gateway API provider via HelmChartConfig
+  hosts: k3s_controllers
+  become: true
+  tasks:
+    - name: Ensure k3s server manifests directory exists
+      ansible.builtin.file:
+        path: /var/lib/rancher/k3s/server/manifests
+        state: directory
+        mode: "0755"
+
+    - name: Render Traefik HelmChartConfig enabling the Gateway API provider
+      ansible.builtin.template:
+        src: traefik-gateway-helmchartconfig.yml.j2
+        dest: /var/lib/rancher/k3s/server/manifests/traefik-gateway-config.yaml
+        mode: "0644"
+
+- name: Apply the shared Gateway resource and verify Gateway API is ready
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    kubeconfig_path: "{{ playbook_dir }}/../.cache/testlab-kubeconfig.yaml"
+    gateway_path: "{{ playbook_dir }}/../.cache/gateway-api-gateway.yml"
+  tasks:
+    # Traefik picks up the HelmChartConfig values (and, on this k3s version,
+    # installs the Gateway API CRDs as part of the same chart upgrade) here.
+    - name: Wait for Traefik to roll out with the Gateway provider enabled
+      ansible.builtin.command: >
+        kubectl --kubeconfig {{ kubeconfig_path }} -n kube-system
+        rollout status deployment/traefik --timeout=120s
+      changed_when: false
+
+    - name: Render the shared Gateway resource
+      ansible.builtin.template:
+        src: gateway-api-gateway.yml.j2
+        dest: "{{ gateway_path }}"
+        mode: "0644"
+
+    - name: Apply the shared Gateway resource
+      ansible.builtin.command: >
+        kubectl --kubeconfig {{ kubeconfig_path }} apply -f {{ gateway_path }}
+      register: gateway_apply
+      changed_when: "'unchanged' not in gateway_apply.stdout"
+
+    # argv (not a plain command string) because the jsonpath filter's
+    # embedded double quotes get eaten by ansible.builtin.command's shlex
+    # parsing otherwise, leaving kubectl an unquoted (invalid) identifier.
+    - name: Wait for the traefik GatewayClass to be Accepted
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - --kubeconfig
+          - "{{ kubeconfig_path }}"
+          - get
+          - gatewayclass
+          - traefik
+          - -o
+          - 'jsonpath={.status.conditions[?(@.type=="Accepted")].status}'
+      register: gatewayclass_status
+      until: gatewayclass_status.stdout == "True"
+      retries: 12
+      delay: 5
+      changed_when: false
+
+    - name: Wait for the shared Gateway to be Programmed
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - --kubeconfig
+          - "{{ kubeconfig_path }}"
+          - -n
+          - kube-system
+          - get
+          - gateway
+          - traefik-gateway
+          - -o
+          - 'jsonpath={.status.conditions[?(@.type=="Programmed")].status}'
+      register: gateway_status
+      until: gateway_status.stdout == "True"
+      retries: 12
+      delay: 5
+      changed_when: false

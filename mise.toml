@@ -98,7 +98,7 @@ run = "yamllint ."
 [tasks."kubernetes:testlab:validate"]
 description = "validate rendered kubernetes manifests for tofu/testlab against the k8s schema"
 dir = "{{config_root}}/kubernetes"
-run = "kubectl kustomize testlab --enable-helm | kubeconform -strict -kubernetes-version 1.36.0 -summary"
+run = "kubectl kustomize testlab --enable-helm | kubeconform -strict -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'"
 
 [tasks."kubernetes:check"]
 description = "check formatting and validity of kubernetes manifests"

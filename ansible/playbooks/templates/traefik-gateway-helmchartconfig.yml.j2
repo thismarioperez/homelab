@@ -1,0 +1,24 @@
+---
+# Dropped into k3s's server manifests directory, where k3s's built-in Helm
+# controller auto-detects and applies it against the traefik HelmChart it
+# already manages — no restart needed (see k3s_vip_install.yml for the same
+# mechanism). Enabling the Gateway provider here is also what causes k3s's
+# bundled Traefik chart to install the Gateway API standard-channel CRDs
+# itself; no separate CRD install step is needed on this k3s version.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+    # We hand-author our own Gateway (see gateway-api-gateway.yml.j2) rather
+    # than use the chart's opinionated default one, so it stays disabled
+    # here; gatewayClass stays on so Traefik still owns its GatewayClass.
+    gateway:
+      enabled: false
+    gatewayClass:
+      enabled: true

@@ -8,7 +8,7 @@ each cluster in this repo. Updated whenever VM counts/sizes change.
 Runs entirely on the single [testlab host](hardware.md#testlab-host) (Intel
 NUC6i5SYH, 2 cores / 4 threads, 32GB RAM, 1TB ZFS-backed `storage`
 datastore, thick-provisioned). Its purpose is to validate the MetalLB +
-Traefik ingress + kube-vip pattern — stable, reserved IPs for both the
+Traefik Gateway API + kube-vip pattern — stable, reserved IPs for both the
 control plane (`k3s_apiserver_vip`) and services (`k3s_lb_ip`) — in
 isolation from the production `lab` cluster, ahead of building that same
 pattern into `lab`. It does not test HA failover behavior; a single

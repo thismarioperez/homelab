@@ -39,3 +39,6 @@
 
 - name: Install and configure MetalLB
   ansible.builtin.import_playbook: k3s_metallb_install.yml
+
+- name: Enable Traefik's Gateway API provider
+  ansible.builtin.import_playbook: k3s_gateway_install.yml
