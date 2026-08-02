@@ -3,6 +3,7 @@ _.file = ".env"
 
 [tools]
 opentofu = "1.12"
+node = "lts"
 kubectl = "1.36"
 kubeconform = "latest"
 helm = "3"
