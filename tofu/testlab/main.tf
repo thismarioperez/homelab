@@ -124,8 +124,8 @@ resource "proxmox_download_file" "ubuntu_2404" {
   }
 }
 
-module "k3s_vm" {
-  count  = local.k3s_vm_count
+module "k3s_vm_controller" {
+  count  = length(var.k3s_controller_ips)
   source = "../modules/ubuntu-vm"
 
   # Explicit: the mac_address/ip_config inputs below don't reference the
@@ -138,8 +138,8 @@ module "k3s_vm" {
   image_file_id = proxmox_download_file.ubuntu_2404.id
 
   cores       = var.vm_cores
-  memory      = var.vm_memory
-  disk_size   = tonumber(trimsuffix(var.vm_disk_size, "G"))
+  memory      = var.k3s_controller_memory
+  disk_size   = tonumber(trimsuffix(var.k3s_controller_disk_size, "G"))
   vlan_id     = var.vlan_id
   mac_address = local.k3s_vm_macs[count.index]
 
@@ -148,12 +148,42 @@ module "k3s_vm" {
   ssh_keys = [data.onepassword_item.secrets["vm_ssh_key"].public_key]
 }
 
+module "k3s_vm_worker" {
+  count  = length(var.k3s_worker_ips)
+  source = "../modules/ubuntu-vm"
+
+  # Explicit: the mac_address/ip_config inputs below don't reference the
+  # reservation, so without this the two resources have no ordering
+  # constraint and could apply in parallel.
+  depends_on = [opnsense_kea_dhcpv4_reservation.k3s_vm]
+
+  vm_name       = local.k3s_vm_names[length(var.k3s_controller_ips) + count.index]
+  node_name     = var.node_name
+  image_file_id = proxmox_download_file.ubuntu_2404.id
+
+  cores       = var.vm_cores
+  memory      = var.k3s_worker_memory
+  disk_size   = tonumber(trimsuffix(var.k3s_worker_disk_size, "G"))
+  vlan_id     = var.vlan_id
+  mac_address = local.k3s_vm_macs[length(var.k3s_controller_ips) + count.index]
+
+  username = data.onepassword_item.secrets["vm_login"].username
+  password = data.onepassword_item.secrets["vm_login"].password
+  ssh_keys = [data.onepassword_item.secrets["vm_ssh_key"].public_key]
+}
+
+locals {
+  # Controllers first, then workers — matches local.k3s_vm_names/k3s_vm_ips
+  # ordering, so index i here lines up with local.k3s_vm_ips[i].
+  k3s_vms = concat(module.k3s_vm_controller, module.k3s_vm_worker)
+}
+
 resource "ansible_host" "k3s_vm" {
   count = local.k3s_vm_count
 
-  # depends on the actual VM, not just the reservation, so inventory only
+  # depends on the actual VMs, not just the reservation, so inventory only
   # lists hosts that have actually been provisioned
-  depends_on = [module.k3s_vm]
+  depends_on = [module.k3s_vm_controller, module.k3s_vm_worker]
 
   name   = local.k3s_vm_names[count.index]
   groups = [count.index < length(var.k3s_controller_ips) ? "k3s_controllers" : "k3s_workers"]

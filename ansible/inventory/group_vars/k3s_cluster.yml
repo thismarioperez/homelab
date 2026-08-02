@@ -7,9 +7,11 @@ token: "{{ lookup('community.general.onepassword', 'testlab - k3s cluster token'
 tofu_binary_path: "{{ lookup('ansible.builtin.pipe', 'command -v tofu') }}"
 k3s_apiserver_vip: "{{ lookup('cloud.terraform.tf_output', 'k3s_apiserver_vip', project_path='../tofu/testlab', binary_path=tofu_binary_path) }}"
 
-# kube-vip fronts the 3 controllers with a single floating IP (see
-# playbooks/k3s_vip_install.yml), so cluster access survives any one
-# controller going down instead of hardcoding groups['server'][0].
+# kube-vip fronts the controller(s) with a single floating IP (see
+# playbooks/k3s_vip_install.yml). testlab currently runs a single
+# controller, so this buys no failover today, but the VIP is kept so
+# --tls-san/api_endpoint stay stable if the controller count grows again
+# here or in the `lab` cluster this pattern is meant to be reused for.
 api_endpoint: "{{ k3s_apiserver_vip }}"
 
 # MetalLB replaces k3s's built-in Klipper servicelb, which just DNAT-forwards

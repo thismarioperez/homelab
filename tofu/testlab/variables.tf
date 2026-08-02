@@ -48,16 +48,28 @@ variable "vm_cores" {
   default     = 2
 }
 
-variable "vm_disk_size" {
+variable "k3s_controller_disk_size" {
   type        = string
-  description = "Default disk size for testlab VMs"
-  default     = "32G"
+  description = "Disk size for k3s controller VMs"
+  default     = "80G"
 }
 
-variable "vm_memory" {
+variable "k3s_worker_disk_size" {
+  type        = string
+  description = "Disk size for k3s worker VMs"
+  default     = "620G"
+}
+
+variable "k3s_controller_memory" {
   type        = number
-  description = "Default memory (MB) for testlab VMs"
-  default     = 2560
+  description = "Memory (MB) for k3s controller VMs"
+  default     = 6144
+}
+
+variable "k3s_worker_memory" {
+  type        = number
+  description = "Memory (MB) for k3s worker VMs"
+  default     = 18432
 }
 
 variable "k3s_vm_subnet_cidr" {
@@ -81,11 +93,11 @@ variable "k3s_lb_ip" {
 variable "k3s_controller_ips" {
   type        = list(string)
   description = "Static IPs to reserve for k3s controller (server) nodes, one per node; list length determines the controller count"
-  default     = ["10.30.60.12", "10.30.60.13", "10.30.60.14"]
+  default     = ["10.30.60.12"]
 }
 
 variable "k3s_worker_ips" {
   type        = list(string)
   description = "Static IPs to reserve for k3s worker (agent) nodes, one per node; list length determines the worker count"
-  default     = ["10.30.60.15", "10.30.60.16"]
+  default     = ["10.30.60.13"]
 }
