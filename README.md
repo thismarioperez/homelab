@@ -15,11 +15,12 @@ provisioned with OpenTofu, configured with Ansible.
 - [Kubernetes](docs/kubernetes.md) — resource distribution across k3s
   cluster VMs
 
-## Goals
+## TODO
 
 - [x] Finish testlab k3s cluster
 - [x] Setup HA testlab k3s cluster
 - [x] Improve `testlab` tofu project structure
+- [ ] Setup persistent storage solution for k3s clusters
 - [ ] Expand Ansible playbooks
 - [ ] Take inventory of existing snowflake nodes in Lab
 - [ ] Create K3s cluster in Lab
