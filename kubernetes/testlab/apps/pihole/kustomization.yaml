@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: pihole
+
+resources:
+  - namespace.yaml
+
+helmCharts:
+  - name: pihole
+    repo: oci://oci.trueforge.org/truecharts
+    version: 22.11.0
+    releaseName: pihole
+    namespace: pihole
+    valuesInline:
+      # Throwaway instance for testing Longhorn data replication/failover —
+      # not used for real DNS. No ingress/HTTPRoute; UI reachable at
+      # <node-ip>:30980.
+      service:
+        main:
+          type: NodePort
+          ports:
+            main:
+              nodePort: 30980
+      # Labels mark these PVCs as recurring-job sources and put them in the
+      # "pihole-backup" group, targeted by the RecurringJob in
+      # recurringjob.yaml. PVC labels override any labels on the underlying
+      # Longhorn Volume.
+      persistence:
+        config:
+          size: 4Gi
+          labels:
+            recurring-job.longhorn.io/source: enabled
+            recurring-job-group.longhorn.io/pihole-backup: enabled
+        dnsmasq:
+          size: 1Gi
+          labels:
+            recurring-job.longhorn.io/source: enabled
+            recurring-job-group.longhorn.io/pihole-backup: enabled
