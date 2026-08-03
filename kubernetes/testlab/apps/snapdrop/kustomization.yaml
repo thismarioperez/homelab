@@ -13,3 +13,7 @@ helmCharts:
     version: 13.7.0
     releaseName: snapdrop
     namespace: snapdrop
+    valuesInline:
+      persistence:
+        config:
+          size: 1Gi
