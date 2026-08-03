@@ -20,7 +20,11 @@ k3s_lb_ip: "{{ lookup('cloud.terraform.tf_output', 'k3s_lb_ip', project_path='..
 
 # --tls-san covers the kube-vip VIP in the apiserver's TLS cert, since
 # clients (kubectl/helm) connect via the VIP rather than a node's own IP.
-extra_server_args: "--tls-san {{ k3s_apiserver_vip }} --disable servicelb"
+# --disable local-storage stops k3s from deploying local-path-provisioner,
+# which otherwise registers itself as a second default StorageClass
+# alongside Longhorn (kubernetes/testlab/apps/longhorn) and makes default
+# PVC binding ambiguous.
+extra_server_args: "--tls-san {{ k3s_apiserver_vip }} --disable servicelb --disable local-storage"
 metallb_chart_version: "0.16.1"
 
 kube_vip_version: "v1.2.1"

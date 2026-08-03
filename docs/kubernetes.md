@@ -59,6 +59,17 @@ host's 4 threads. The controller gets just enough for the OS, etcd, k3s
 server, and kube-vip; the worker gets the bulk of both budgets since it's
 where Traefik, MetalLB's speaker, and test workloads actually run.
 
+### Persistent storage
+
+[Longhorn](https://longhorn.io) (`kubernetes/testlab/apps/longhorn`) is the
+default StorageClass for general-purpose PVCs. `defaultReplicaCount` is set
+to 1 since the cluster runs a single worker — Longhorn provides a CSI layer
+over local disk here, not replication/HA.
+
+A separate `nfs.csi.k8s.io` StorageClass (non-default) is reserved for
+shared media mounts (Jellyfin, Sonarr/Radarr, downloaders, etc.), backed by
+a NAS rather than the worker's local disk.
+
 ## lab
 
 Not yet implemented — see the [README goals](../README.md#goals). This
