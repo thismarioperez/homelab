@@ -1,4 +1,3 @@
----
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
@@ -6,7 +5,9 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - {{ k3s_lb_ip }}/32
+    # Replaced by kustomize `replacements` from the ConfigMap generated out
+    # of lb.env — see kustomization.yaml.
+    - 0.0.0.0/32
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement

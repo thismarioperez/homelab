@@ -40,8 +40,5 @@
 - name: Import k3s-ansible cluster provisioning playbook
   ansible.builtin.import_playbook: k3s.orchestration.site
 
-- name: Install and configure MetalLB
-  ansible.builtin.import_playbook: k3s_metallb_install.yml
-
-- name: Enable Traefik's Gateway API provider
-  ansible.builtin.import_playbook: k3s_gateway_install.yml
+- name: Fetch kubeconfig for local kubectl/helm access
+  ansible.builtin.import_playbook: k3s_fetch_kubeconfig.yml

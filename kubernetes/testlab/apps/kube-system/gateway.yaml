@@ -1,0 +1,16 @@
+# Single cluster-wide Gateway, shared by every app namespace's HTTPRoutes
+# via allowedRoutes.namespaces.from: All.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: traefik-gateway
+  namespace: kube-system
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: web
+      port: 8000
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All

@@ -14,3 +14,4 @@ ansible/.cache/
 .claude/settings.local.json
 
 kubernetes/**/charts/
+kubernetes/testlab/apps/metallb-system/lb.env

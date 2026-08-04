@@ -14,10 +14,6 @@ k3s_apiserver_vip: "{{ lookup('cloud.terraform.tf_output', 'k3s_apiserver_vip', 
 # here or in the `lab` cluster this pattern is meant to be reused for.
 api_endpoint: "{{ k3s_apiserver_vip }}"
 
-# MetalLB replaces k3s's built-in Klipper servicelb, which just DNAT-forwards
-# a node's own IP rather than handing out a dedicated LoadBalancer address.
-k3s_lb_ip: "{{ lookup('cloud.terraform.tf_output', 'k3s_lb_ip', project_path='../tofu/testlab', binary_path=tofu_binary_path) }}"
-
 # --tls-san covers the kube-vip VIP in the apiserver's TLS cert, since
 # clients (kubectl/helm) connect via the VIP rather than a node's own IP.
 # --disable local-storage stops k3s from deploying local-path-provisioner,
@@ -25,7 +21,6 @@ k3s_lb_ip: "{{ lookup('cloud.terraform.tf_output', 'k3s_lb_ip', project_path='..
 # alongside Longhorn (kubernetes/testlab/apps/longhorn) and makes default
 # PVC binding ambiguous.
 extra_server_args: "--tls-san {{ k3s_apiserver_vip }} --disable servicelb --disable local-storage"
-metallb_chart_version: "0.16.1"
 
 kube_vip_version: "v1.2.1"
 k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
