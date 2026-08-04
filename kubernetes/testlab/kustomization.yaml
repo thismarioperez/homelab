@@ -5,5 +5,4 @@ resources:
   - apps/kube-system
   - apps/metallb-system
   - apps/longhorn
-  - apps/snapdrop
-  - apps/pihole
+  - apps/default
