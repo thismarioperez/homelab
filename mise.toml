@@ -105,10 +105,19 @@ dir = "{{config_root}}/kubernetes/testlab"
 depends = ["kubernetes:testlab:render-metallb-config", "kubernetes:testlab:apply-crds"]
 run = "helmfile sync"
 
+[tasks."kubernetes:testlab:wait-eso-webhook"]
+description = "wait for the External Secrets webhook to be ready — apply-manifests' ClusterSecretStore create fails if it races ahead of this on a fresh install"
+run = "kubectl wait pod -n security-system -l app.kubernetes.io/name=external-secrets-webhook --for=condition=Ready --timeout=90s"
+
+[tasks."kubernetes:testlab:wait-metallb-webhook"]
+description = "wait for the MetalLB controller (which also serves its validating webhook) to be ready — apply-manifests' IPAddressPool/L2Advertisement create fails if it races ahead of this on a fresh install"
+run = "kubectl wait pod -n metallb-system -l app.kubernetes.io/component=controller --for=condition=Ready --timeout=90s"
+
 [tasks."kubernetes:testlab:apply-manifests"]
-description = "apply testlab raw kubernetes manifests (namespaces, CRs, routes) via kustomize"
+description = "apply testlab raw kubernetes manifests (namespaces, CRs, routes) via kustomize, retrying on transient webhook-not-ready errors — see apply-testlab-manifests.sh"
 dir = "{{config_root}}/kubernetes"
-run = "kubectl apply -k testlab"
+depends = ["kubernetes:testlab:wait-eso-webhook", "kubernetes:testlab:wait-metallb-webhook"]
+run = "./apply-testlab-manifests.sh"
 
 [tasks."kubernetes:testlab:apply"]
 description = "apply the full testlab stack: CRDs, then helm chart releases, then raw manifests"
@@ -133,12 +142,21 @@ run = [
 ]
 
 [tasks."kubernetes:testlab:delete"]
-description = "delete testlab raw manifests and helm chart releases from the cluster"
+description = "delete testlab helm chart releases and raw manifests from the cluster — does NOT remove CRDs, see kubernetes:testlab:delete-crds"
 dir = "{{config_root}}/kubernetes/testlab"
 run = [
-  "kubectl delete -k {{config_root}}/kubernetes/testlab",
   "helmfile destroy",
+  # kubectl delete -k testlab (unfiltered) always fails on `default`: it's
+  # declared in apps/default/namespace.yaml so `apply -k` can reconcile it,
+  # but k8s refuses to ever delete the default namespace. Filter it out so
+  # this task exits cleanly instead of erroring on the very last resource.
+  "kubectl kustomize {{config_root}}/kubernetes/testlab | yq ea 'select(.kind != \"Namespace\" or .metadata.name != \"default\")' - | kubectl delete --ignore-not-found -f -",
 ]
+
+[tasks."kubernetes:testlab:delete-crds"]
+description = "delete all CRDs bundled by testlab helm charts (see bootstrap/crds/helmfile.yaml) — cascade-deletes every custom resource of that kind cluster-wide, run only for a full from-nothing retry, never as routine teardown"
+dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
+run = "./delete.sh"
 
 [tasks."kubernetes:yamllint"]
 description = "check kubernetes yaml formatting with yamllint"
