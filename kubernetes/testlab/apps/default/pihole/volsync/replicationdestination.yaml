@@ -1,0 +1,22 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: pihole-config-restore
+  namespace: default
+spec:
+  rsync:
+    # Destination is the SSH server; VolSync auto-generates the SSH keypair
+    # Secret here (see .status.rsync.sshKeys) — the ReplicationSource must
+    # be pointed at that same Secret and at .status.rsync.address.
+    copyMethod: Direct
+    accessModes: ["ReadWriteOnce"]
+    # Matches pihole-config's own size (apps/default/pihole/app/values.yaml
+    # persistence.config.size) — this is a mirror of that PVC, not a distinct
+    # capacity decision.
+    capacity: 4Gi
+    storageClassName: nfs-backups
+    serviceType: ClusterIP
+  trigger:
+    # Manual trigger for a one-off restore/bootstrap; delete this
+    # ReplicationDestination once the fresh PVC is populated.
+    manual: restore-once
