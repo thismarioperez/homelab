@@ -94,9 +94,15 @@ dir = "{{config_root}}/tofu/testlab"
 env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "test -f {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env || echo \"LB_IP=$(tofu output -raw k3s_lb_ip)/32\" > {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env"
 
+[tasks."kubernetes:testlab:apply-volumesnapshot-crds"]
+description = "apply the snapshot.storage.k8s.io CRDs VolSync's controller requires at startup (crashloops without them, even though this repo never uses copyMethod: Snapshot) — via bootstrap/crds/apply-volumesnapshot-crds.sh — must run before apply-crds"
+dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
+run = "./apply-volumesnapshot-crds.sh"
+
 [tasks."kubernetes:testlab:apply-crds"]
 description = "extract and apply CRDs bundled in testlab helm charts, stamped with Helm ownership metadata so helmfile sync can adopt them — via bootstrap/crds/apply.sh — must run before apply-charts and apply-manifests"
 dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
+depends = ["kubernetes:testlab:apply-volumesnapshot-crds"]
 run = "./apply.sh"
 
 [tasks."kubernetes:testlab:apply-charts"]
@@ -157,6 +163,11 @@ run = [
 description = "delete all CRDs bundled by testlab helm charts (see bootstrap/crds/helmfile.yaml) — cascade-deletes every custom resource of that kind cluster-wide, run only for a full from-nothing retry, never as routine teardown"
 dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
 run = "./delete.sh"
+
+[tasks."kubernetes:testlab:delete-volumesnapshot-crds"]
+description = "delete the snapshot.storage.k8s.io CRDs applied by apply-volumesnapshot-crds — cascade-deletes every VolumeSnapshot cluster-wide, run only for a full from-nothing retry, never as routine teardown"
+dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
+run = "./delete-volumesnapshot-crds.sh"
 
 [tasks."kubernetes:yamllint"]
 description = "check kubernetes yaml formatting with yamllint"

@@ -39,6 +39,28 @@ Run this before `helmfile sync` on the root `../../helmfile.yaml` and before
 Versions here must be kept in sync by hand with the real releases in
 `../../helmfile.yaml` — there's no automated link between the two files.
 
+## VolumeSnapshot CRDs
+
+VolSync's controller hard-requires the `snapshot.storage.k8s.io` CRDs
+(`VolumeSnapshot`/`VolumeSnapshotClass`/`VolumeSnapshotContent`) to exist at
+startup, and crashloops without them — even though this repo only uses
+VolSync's `Direct` copyMethod, never `Snapshot`
+(see [`../../apps/storage-system/volsync/examples/README.md`](../../apps/storage-system/volsync/examples/README.md)).
+Those CRDs aren't bundled by VolSync's own chart (or any chart in
+`helmfile.yaml`) — they come from the separate
+[`kubernetes-csi/external-snapshotter`](https://github.com/kubernetes-csi/external-snapshotter)
+project, so they can't go through the `helmfile template --include-crds`
+extraction `apply.sh`/`delete.sh` use. Apply them as their own step, before
+`apply.sh`:
+
+```sh
+./bootstrap/crds/apply-volumesnapshot-crds.sh
+```
+
+The pinned version lives in that script (`VOLSYNC_SNAPSHOTTER_VERSION`) and
+must be bumped by hand — same manual-sync caveat as the Helm chart versions
+above.
+
 ## Migrating to Flux
 
 If this cluster moves from local `helmfile sync` to Flux (`HelmRelease`

@@ -67,7 +67,9 @@ mise run kubernetes:testlab:apply
 ```
 
 Runs, in order: `render-metallb-config` (writes MetalLB's reserved LB IP
-from tofu output) → `apply-crds` (pre-applies CRDs bundled by charts, via
+from tofu output) → `apply-volumesnapshot-crds` (applies the
+`snapshot.storage.k8s.io` CRDs VolSync's controller requires at startup) →
+`apply-crds` (pre-applies CRDs bundled by charts, via
 [`bootstrap/crds/`](../kubernetes/testlab/bootstrap/crds/README.md)) →
 `apply-charts` (`helmfile sync`) → `apply-manifests`
 (`kubectl apply -k testlab`).
