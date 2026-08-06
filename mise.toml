@@ -95,9 +95,9 @@ env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "test -f {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env || echo \"LB_IP=$(tofu output -raw k3s_lb_ip)/32\" > {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env"
 
 [tasks."kubernetes:testlab:apply-crds"]
-description = "extract and apply CRDs bundled in testlab helm charts, via bootstrap/crds/helmfile.yaml — must run before apply-charts and apply-manifests"
-dir = "{{config_root}}/kubernetes/testlab"
-run = "helmfile --file bootstrap/crds/helmfile.yaml template --include-crds | yq ea 'select(.kind == \"CustomResourceDefinition\")' - | kubectl apply --server-side --force-conflicts -f -"
+description = "extract and apply CRDs bundled in testlab helm charts, stamped with Helm ownership metadata so helmfile sync can adopt them — via bootstrap/crds/apply.sh — must run before apply-charts and apply-manifests"
+dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
+run = "./apply.sh"
 
 [tasks."kubernetes:testlab:apply-charts"]
 description = "sync all testlab helm chart releases via helmfile"

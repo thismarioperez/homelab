@@ -11,12 +11,10 @@ for standing up a fresh cluster.
 (currently MetalLB, csi-driver-nfs, External Secrets Operator, VolSync —
 see the comment in that file for why others are excluded). It is
 never `helmfile sync`'d; it exists only so `helmfile template` can render
-each chart and its CRDs can be scraped out:
+each chart and its CRDs can be scraped out and applied via `apply.sh`:
 
 ```sh
-helmfile --file bootstrap/crds/helmfile.yaml template --include-crds \
-  | yq ea 'select(.kind == "CustomResourceDefinition")' - \
-  | kubectl apply --server-side --force-conflicts -f -
+./bootstrap/crds/apply.sh
 ```
 
 `--include-crds` is required — `helm`/`helmfile template` omit a chart's own
@@ -24,6 +22,16 @@ helmfile --file bootstrap/crds/helmfile.yaml template --include-crds \
 OnePasswordItem CRD to be hand-vendored as a workaround under
 `kustomize --enable-helm`; the fix is the same flag family, not a
 kustomize-specific quirk).
+
+Plain `kubectl apply --server-side` does not stamp the
+`app.kubernetes.io/managed-by: Helm` label or `meta.helm.sh/release-*`
+annotations that Helm 3 requires to adopt a pre-existing resource — without
+them, the real `helm install` in `../../helmfile.yaml` fails with
+`invalid ownership metadata` the first time it tries to install a chart
+whose CRDs were already applied here. `apply.sh` applies each chart's CRDs
+per-release (not as one combined batch) and stamps them with that release's
+ownership metadata immediately after, so `helmfile sync` can adopt them
+cleanly.
 
 Run this before `helmfile sync` on the root `../../helmfile.yaml` and before
 `kubectl apply -k` on the raw manifests.
