@@ -3,8 +3,8 @@ repositories:
     url: https://metallb.github.io/metallb
   - name: csi-driver-nfs
     url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-  - name: onepassword-connect
-    url: https://1password.github.io/connect-helm-charts/
+  - name: external-secrets
+    url: https://charts.external-secrets.io
   # TrueCharts (pihole, snapdrop) are referenced directly via their OCI ref
   # in releases[].chart below — no repository entry needed for OCI charts.
 
@@ -23,12 +23,12 @@ releases:
     values:
       - apps/storage-system/csi-driver-nfs/app/values.yaml
 
-  - name: onepassword-connect
+  - name: external-secrets
     namespace: security-system
-    chart: onepassword-connect/connect
-    version: 2.4.1
+    chart: external-secrets/external-secrets
+    version: 2.8.0
     values:
-      - apps/security-system/1password-connect/app/values.yaml
+      - apps/security-system/external-secrets/app/values.yaml
 
   - name: pihole
     namespace: default
