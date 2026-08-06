@@ -1,0 +1,4 @@
+# All defaults are used — VolSync's chart manages its own RBAC/ServiceAccount
+# and bundles its CRDs (manageCRDs: true, handled by the bootstrap/crds
+# extraction flow, see bootstrap/crds/helmfile.yaml), so no overrides are
+# needed for a single-controller install.

@@ -1,0 +1,19 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: example-app-restore
+  namespace: storage-system
+spec:
+  rsync:
+    # Destination is the SSH server; VolSync auto-generates the SSH keypair
+    # Secret here (see .status.rsync.sshKeys) — the ReplicationSource must
+    # be pointed at that same Secret and at .status.rsync.address.
+    copyMethod: Direct
+    accessModes: ["ReadWriteOnce"]
+    capacity: 5Gi
+    storageClassName: nfs-backups
+    serviceType: ClusterIP
+  trigger:
+    # Manual trigger for a one-off restore/bootstrap; delete this
+    # ReplicationDestination once the fresh PVC is populated.
+    manual: restore-once

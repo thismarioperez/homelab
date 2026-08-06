@@ -5,6 +5,8 @@ repositories:
     url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
   - name: external-secrets
     url: https://charts.external-secrets.io
+  - name: volsync
+    url: https://backube.github.io/helm-charts/
   # TrueCharts (pihole, snapdrop) are referenced directly via their OCI ref
   # in releases[].chart below — no repository entry needed for OCI charts.
 
@@ -22,6 +24,13 @@ releases:
     version: 4.13.4
     values:
       - apps/storage-system/csi-driver-nfs/app/values.yaml
+
+  - name: volsync
+    namespace: storage-system
+    chart: volsync/volsync
+    version: 0.16.0
+    values:
+      - apps/storage-system/volsync/app/values.yaml
 
   - name: external-secrets
     namespace: security-system
