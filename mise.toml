@@ -255,8 +255,8 @@ depends = [
 
 [tasks."markdown:fmt"]
 description = "format all markdown files with mdformat"
-run = "mdformat --exclude '**/.terraform/**' --exclude '**/charts/**' ."
+run = "mdformat --exclude '**/.terraform/**' --exclude '**/charts/**' --exclude '**/.claude/**' ."
 
 [tasks."markdown:fmt-check"]
 description = "check markdown formatting without modifying files"
-run = "mdformat --exclude '**/.terraform/**' --exclude '**/charts/**' --check ."
+run = "mdformat --exclude '**/.terraform/**' --exclude '**/charts/**' --exclude '**/.claude/**' --check ."
