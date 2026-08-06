@@ -15,6 +15,7 @@ spec:
     copyMethod: Direct
     # address/sshKeys come from the paired ReplicationDestination's status
     # once it's created — see replicationdestination.yaml. Values below are
-    # placeholders showing the expected shape, not real values.
-    address: example-app-restore.storage-system.svc.cluster.local
+    # placeholders showing the expected shape, not real values. Note
+    # VolSync names the Service volsync-rsync-dst-<name>, not <name> itself.
+    address: volsync-rsync-dst-example-app-restore.storage-system.svc.cluster.local
     sshKeys: volsync-rsync-dst-src-example-app-restore
