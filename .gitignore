@@ -12,6 +12,7 @@ backend.hcl
 ansible/.cache/
 
 .claude/settings.local.json
+.claude/__*
 
 kubernetes/**/charts/
 kubernetes/testlab/apps/metallb-system/lb.env

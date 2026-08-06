@@ -12,8 +12,8 @@ provisioned with OpenTofu, configured with Ansible.
 - [OPNsense Bruno collection](docs/collections/OPNsense/README.md) — for
   exploring the OPNsense router's REST API
 - [Hardware](docs/hardware.md) — physical devices in the lab
-- [Kubernetes](docs/kubernetes.md) — resource distribution across k3s
-  cluster VMs
+- [Kubernetes](docs/kubernetes.md) — cluster standup steps and resource
+  distribution across k3s cluster VMs
 
 ## TODO
 
@@ -21,7 +21,6 @@ provisioned with OpenTofu, configured with Ansible.
 - [x] Setup HA testlab k3s cluster
 - [x] Improve `testlab` tofu project structure
 - [x] Setup persistent storage solution for k3s clusters
-- [ ] Setup [volsync](https://volsync.readthedocs.io/en/stable/) for automated restoration
 - [ ] Setup Flux for in-cluster GitOps reconciliation (replace local `kustomize --enable-helm` applies)
 - [ ] Expand Ansible playbooks
 - [ ] Take inventory of existing snowflake nodes in Lab

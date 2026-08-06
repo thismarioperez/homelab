@@ -4,5 +4,6 @@ kind: Kustomization
 resources:
   - apps/kube-system
   - apps/metallb-system
-  - apps/longhorn
+  - apps/storage-system
+  - apps/security-system
   - apps/default

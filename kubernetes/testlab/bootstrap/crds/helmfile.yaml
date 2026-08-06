@@ -1,0 +1,41 @@
+# CRD-extraction only — never run `helmfile sync` against this file.
+#
+# Lists the full chart refs (same chart/version as the real releases in
+# ../../helmfile.yaml) purely so `helmfile template` can render them and
+# their CRDs can be scraped out and applied ahead of any real install:
+#
+#   helmfile --file bootstrap/crds/helmfile.yaml template \
+#     | yq ea 'select(.kind == "CustomResourceDefinition")' - \
+#     | kubectl apply --server-side --force-conflicts -f -
+#
+# Only charts that bundle their own CRDs are listed here. The TrueCharts
+# apps (pihole, snapdrop) bundle no CRDs and are intentionally excluded.
+# Versions must be kept in sync with ../../helmfile.yaml by hand — there is
+# no automatic link between the two files.
+repositories:
+  - name: metallb
+    url: https://metallb.github.io/metallb
+  - name: csi-driver-nfs
+    url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+  - name: external-secrets
+    url: https://charts.external-secrets.io
+  - name: volsync
+    url: https://backube.github.io/helm-charts/
+
+releases:
+  - name: metallb-crds
+    namespace: metallb-system
+    chart: metallb/metallb
+    version: 0.16.1
+  - name: csi-driver-nfs-crds
+    namespace: storage-system
+    chart: csi-driver-nfs/csi-driver-nfs
+    version: 4.13.4
+  - name: external-secrets-crds
+    namespace: security-system
+    chart: external-secrets/external-secrets
+    version: 2.8.0
+  - name: volsync-crds
+    namespace: storage-system
+    chart: volsync/volsync
+    version: 0.16.0

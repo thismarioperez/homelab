@@ -1,0 +1,21 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: example-app-backup
+  namespace: storage-system
+spec:
+  sourcePVC: example-app-data
+  trigger:
+    # Illustrative only — pick a real cadence when wiring this to a live PVC.
+    schedule: "0 3 * * *"
+  rsync:
+    # Plain rsync (not rsync-tls): same-cluster, same-VLAN NFS traffic never
+    # leaves trusted network segments, so TLS adds cost without a real threat
+    # model it defends against here.
+    copyMethod: Direct
+    # address/sshKeys come from the paired ReplicationDestination's status
+    # once it's created — see replicationdestination.yaml. Values below are
+    # placeholders showing the expected shape, not real values. Note
+    # VolSync names the Service volsync-rsync-dst-<name>, not <name> itself.
+    address: volsync-rsync-dst-example-app-restore.storage-system.svc.cluster.local
+    sshKeys: volsync-rsync-dst-src-example-app-restore

@@ -1,0 +1,24 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: example-app-restore
+  namespace: storage-system
+spec:
+  rsync:
+    # Destination is the SSH server; VolSync auto-generates the SSH keypair
+    # Secret here (see .status.rsync.sshKeys) — the ReplicationSource must
+    # be pointed at that same Secret and at .status.rsync.address.
+    copyMethod: Direct
+    accessModes: ["ReadWriteOnce"]
+    capacity: 5Gi
+    storageClassName: nfs-backups
+    serviceType: ClusterIP
+  # No trigger: the rsync mover's Destination keeps its SSH server pod
+  # running continuously by default — it's a listener, not a periodic job.
+  # The paired ReplicationSource's schedule is what drives each sync.
+  #
+  # Only add `trigger: {manual: restore-once}` here if this
+  # ReplicationDestination exists purely for a one-off restore (no ongoing
+  # ReplicationSource pushing to it) — a manual trigger tears the listener
+  # pod down once `status.lastManualSync` catches up, which silently
+  # breaks any scheduled Source relying on it still being up.

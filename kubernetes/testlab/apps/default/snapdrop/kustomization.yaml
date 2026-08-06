@@ -3,14 +3,3 @@ kind: Kustomization
 
 resources:
   - httproute.yaml
-
-helmCharts:
-  - name: snapdrop
-    repo: oci://oci.trueforge.org/truecharts
-    version: 13.7.0
-    releaseName: snapdrop
-    namespace: default
-    valuesInline:
-      persistence:
-        config:
-          size: 1Gi

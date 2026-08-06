@@ -49,6 +49,12 @@ variable "cores" {
   default     = 1
 }
 
+variable "cpu_type" {
+  type        = string
+  description = "QEMU CPU type exposed to the VM. Proxmox defaults to \"qemu64\" (a maximally conservative baseline lacking sse4_1/sse4_2/ssse3/popcnt) if unset, which breaks binaries compiled for the x86-64-v2 baseline or newer."
+  default     = "host"
+}
+
 variable "memory" {
   type        = number
   description = "Dedicated memory in MB"

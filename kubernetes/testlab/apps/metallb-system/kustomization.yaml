@@ -7,13 +7,6 @@ resources:
   - namespace.yaml
   - ipaddresspool.yaml
 
-helmCharts:
-  - name: metallb
-    repo: https://metallb.github.io/metallb
-    version: 0.16.1
-    releaseName: metallb
-    namespace: metallb-system
-
 # lb.env is gitignored and generated locally by
 # `mise run kubernetes:testlab:render-metallb-config` (reads tofu/testlab's
 # k3s_lb_ip output) — run that once, or whenever the reserved IP changes,

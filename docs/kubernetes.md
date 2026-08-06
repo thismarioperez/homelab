@@ -1,4 +1,88 @@
-# Kubernetes Resource Distribution
+# Kubernetes
+
+Cluster standup steps and resource distribution for the k3s clusters in
+this repo.
+
+## Standing up a fresh cluster
+
+End-to-end steps to bring up the `testlab` k3s cluster from nothing:
+Proxmox VMs, k3s, and the full app stack. Assumes
+[workstation setup](workstation-setup.md) is already done (tools installed,
+1Password auth configured, tofu state backend reachable).
+
+### 1. Provision the VMs (OpenTofu)
+
+```bash
+mise run tofu:testlab:init
+mise run tofu:testlab:plan
+mise run tofu:testlab:apply
+```
+
+Creates the controller and worker VMs on Proxmox per `tofu/testlab/` (see
+[resource distribution](#testlab) below for sizing).
+
+### 2. Install k3s (Ansible)
+
+```bash
+mise run ansible:install-collections
+mise run ssh:add-key
+mise run ansible:testlab:inventory   # sanity check
+mise run ansible:testlab:ping        # confirm SSH connectivity
+mise run ansible:testlab:k3s-install # provisions k3s via k3s-io/k3s-ansible
+```
+
+### 3. Fetch the kubeconfig
+
+```bash
+mise run ansible:testlab:kubeconfig
+```
+
+Writes `ansible/.cache/testlab-kubeconfig.yaml`, pointed at the kube-vip
+API server VIP.
+
+```bash
+export KUBECONFIG=ansible/.cache/testlab-kubeconfig.yaml
+kubectl get nodes
+```
+
+### 4. Bootstrap the ESO secret
+
+External Secrets Operator can't resolve any `ExternalSecret` — including
+its own `ClusterSecretStore` — until its 1Password service account token
+exists in-cluster. This is the one secret that has to be created
+out-of-band before anything else can manage secrets for itself:
+
+```bash
+mise run kubernetes:testlab:bootstrap
+```
+
+Requires the `Service Account Auth Token: testlab k3s eso` item in the
+`Home Network` 1Password vault (see
+[`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/external-secrets/cluster-secret-store.yaml)).
+
+### 5. Apply the full stack
+
+```bash
+mise run kubernetes:testlab:apply
+```
+
+Runs, in order: `render-metallb-config` (writes MetalLB's reserved LB IP
+from tofu output) → `apply-volumesnapshot-crds` (applies the
+`snapshot.storage.k8s.io` CRDs VolSync's controller requires at startup) →
+`apply-crds` (pre-applies CRDs bundled by charts, via
+[`bootstrap/crds/`](../kubernetes/testlab/bootstrap/crds/README.md)) →
+`apply-charts` (`helmfile sync`) → `apply-manifests`
+(`kubectl apply -k testlab`).
+
+### 6. Verify
+
+```bash
+mise run kubernetes:testlab:validate    # schema-validates rendered output
+kubectl get pods -A
+kubectl get clustersecretstore onepassword   # should show Valid
+```
+
+## Resource distribution
 
 Living doc tracking how host resources are budgeted across the k3s VMs for
 each cluster in this repo. Updated whenever VM counts/sizes change.
@@ -61,14 +145,13 @@ where Traefik, MetalLB's speaker, and test workloads actually run.
 
 ### Persistent storage
 
-[Longhorn](https://longhorn.io) (`kubernetes/testlab/apps/longhorn`) is the
-default StorageClass for general-purpose PVCs. `defaultReplicaCount` is set
-to 1 since the cluster runs a single worker — Longhorn provides a CSI layer
-over local disk here, not replication/HA.
+k3s's built-in `local-path-provisioner` is the default StorageClass for
+general-purpose PVCs, backed by the worker's local disk.
 
-A separate `nfs.csi.k8s.io` StorageClass (non-default) is reserved for
-shared media mounts (Jellyfin, Sonarr/Radarr, downloaders, etc.), backed by
-a NAS rather than the worker's local disk.
+A separate `nfs.csi.k8s.io` StorageClass (`nfs-backups`, non-default,
+`kubernetes/testlab/apps/storage-system/csi-driver-nfs`) is reserved for
+shared/NFS-backed mounts (Jellyfin, Sonarr/Radarr, downloaders, etc.),
+backed by a NAS rather than the worker's local disk.
 
 ## lab
 
