@@ -3,15 +3,3 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - snapshot-controller
-  - volumesnapshotclass-longhorn.yaml
-  - csi-driver-nfs
-
-# VolSync (backube/volsync) is installed separately via
-# `mise run kubernetes:testlab:apply-volsync` — its Deployment/Service/
-# ServiceAccount/Role templates never set metadata.namespace or reference
-# .Release.Namespace, and kustomize's --enable-helm namespace transformer
-# does not inject one either (confirmed: same failure whether namespace is
-# set via valuesInline, the helmCharts entry, or the parent kustomization).
-# A real `helm install/upgrade -n` correctly namespaces these because the
-# Helm client sets it out-of-band; kustomize's static YAML render cannot.

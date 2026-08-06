@@ -1,6 +1,4 @@
 extends: default
-ignore: |
-  **/charts/
 rules:
   comments:
     min-spaces-from-content: 1

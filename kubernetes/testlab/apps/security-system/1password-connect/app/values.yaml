@@ -1,0 +1,6 @@
+# connect.credentialsName (op-credentials) and operator.token.name
+# (onepassword-token) are bootstrapped manually out-of-band — see
+# docs/kubernetes.md — since Connect must exist before it can manage
+# its own bootstrap secret.
+operator:
+  create: true

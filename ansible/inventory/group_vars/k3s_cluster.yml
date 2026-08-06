@@ -16,11 +16,9 @@ api_endpoint: "{{ k3s_apiserver_vip }}"
 
 # --tls-san covers the kube-vip VIP in the apiserver's TLS cert, since
 # clients (kubectl/helm) connect via the VIP rather than a node's own IP.
-# --disable local-storage stops k3s from deploying local-path-provisioner,
-# which otherwise registers itself as a second default StorageClass
-# alongside Longhorn (kubernetes/testlab/apps/longhorn) and makes default
-# PVC binding ambiguous.
-extra_server_args: "--tls-san {{ k3s_apiserver_vip }} --disable servicelb --disable local-storage"
+# local-storage is left enabled so k3s's built-in local-path-provisioner
+# is the cluster's default StorageClass.
+extra_server_args: "--tls-san {{ k3s_apiserver_vip }} --disable servicelb"
 
 kube_vip_version: "v1.2.1"
 k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml

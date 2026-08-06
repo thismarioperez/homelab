@@ -7,6 +7,8 @@ node = "lts"
 kubectl = "1.36"
 kubeconform = "latest"
 helm = "3"
+helmfile = "latest"
+yq = "latest"
 1password-cli = "latest"
 python = "3"
 pipx = "latest"
@@ -92,22 +94,36 @@ dir = "{{config_root}}/tofu/testlab"
 env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "test -f {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env || echo \"LB_IP=$(tofu output -raw k3s_lb_ip)/32\" > {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env"
 
-[tasks."kubernetes:testlab:apply"]
-description = "apply kubernetes manifests to the tofu/testlab k3s cluster"
-dir = "{{config_root}}/kubernetes"
-depends = ["kubernetes:testlab:render-metallb-config"]
-depends_post = ["kubernetes:testlab:apply-volsync"]
-run = "kubectl kustomize testlab --enable-helm | kubectl apply -f -"
+[tasks."kubernetes:testlab:apply-crds"]
+description = "extract and apply CRDs bundled in testlab helm charts, via bootstrap/crds/helmfile.yaml — must run before apply-charts and apply-manifests"
+dir = "{{config_root}}/kubernetes/testlab"
+run = "helmfile --file bootstrap/crds/helmfile.yaml template --include-crds | yq ea 'select(.kind == \"CustomResourceDefinition\")' - | kubectl apply --server-side --force-conflicts -f -"
 
-[tasks."kubernetes:testlab:apply-volsync"]
-description = "install VolSync via plain helm, bypassing kustomize --enable-helm: the backube/volsync chart's Deployment/Service/ServiceAccount/Role templates never set metadata.namespace or reference .Release.Namespace, so kustomize's namespace transformer has nothing to inject into (confirmed not fixable via valuesInline, patches, or parent-kustomization namespace — see apps/storage-system/kustomization.yaml)"
-run = "helm upgrade --install volsync volsync --repo https://backube.github.io/helm-charts/ --version 0.16.0 --namespace storage-system --create-namespace"
+[tasks."kubernetes:testlab:apply-charts"]
+description = "sync all testlab helm chart releases via helmfile"
+dir = "{{config_root}}/kubernetes/testlab"
+depends = ["kubernetes:testlab:render-metallb-config", "kubernetes:testlab:apply-crds"]
+run = "helmfile sync"
+
+[tasks."kubernetes:testlab:apply-manifests"]
+description = "apply testlab raw kubernetes manifests (namespaces, CRs, routes) via kustomize"
+dir = "{{config_root}}/kubernetes"
+run = "kubectl apply -k testlab"
+
+[tasks."kubernetes:testlab:apply"]
+description = "apply the full testlab stack: CRDs, then helm chart releases, then raw manifests"
+depends = ["kubernetes:testlab:apply-charts"]
+depends_post = ["kubernetes:testlab:apply-manifests"]
+run = "true"
 
 [tasks."kubernetes:testlab:diff"]
-description = "diff kubernetes manifests against the tofu/testlab k3s cluster"
-dir = "{{config_root}}/kubernetes"
+description = "diff testlab helm chart releases and raw manifests against the cluster"
+dir = "{{config_root}}/kubernetes/testlab"
 depends = ["kubernetes:testlab:render-metallb-config"]
-run = "kubectl kustomize testlab --enable-helm | kubectl diff -f -"
+run = [
+  "helmfile diff",
+  "kubectl diff -k {{config_root}}/kubernetes/testlab",
+]
 
 [tasks."kubernetes:testlab:bootstrap"]
 description = "one-time bootstrap of secrets that can't be managed in-cluster yet — currently 1Password Connect's own credentials into the security-system namespace (chicken-and-egg: Connect isn't running yet to manage these itself)"
@@ -118,9 +134,12 @@ run = [
 ]
 
 [tasks."kubernetes:testlab:delete"]
-description = "delete kubernetes manifests from the tofu/testlab k3s cluster"
-dir = "{{config_root}}/kubernetes"
-run = "kubectl kustomize testlab --enable-helm | kubectl delete -f -"
+description = "delete testlab raw manifests and helm chart releases from the cluster"
+dir = "{{config_root}}/kubernetes/testlab"
+run = [
+  "kubectl delete -k {{config_root}}/kubernetes/testlab",
+  "helmfile destroy",
+]
 
 [tasks."kubernetes:yamllint"]
 description = "check kubernetes yaml formatting with yamllint"
@@ -128,10 +147,13 @@ dir = "{{config_root}}/kubernetes"
 run = "yamllint ."
 
 [tasks."kubernetes:testlab:validate"]
-description = "validate rendered kubernetes manifests for tofu/testlab against the k8s schema"
-dir = "{{config_root}}/kubernetes"
+description = "validate rendered testlab helm chart and kustomize output against the k8s schema"
+dir = "{{config_root}}/kubernetes/testlab"
 depends = ["kubernetes:testlab:render-metallb-config"]
-run = "kubectl kustomize testlab --enable-helm | kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'"
+run = [
+  "helmfile template | kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'",
+  "kubectl kustomize {{config_root}}/kubernetes/testlab | kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'",
+]
 
 [tasks."kubernetes:check"]
 description = "check formatting and validity of kubernetes manifests"

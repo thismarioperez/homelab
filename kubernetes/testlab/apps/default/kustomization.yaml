@@ -5,6 +5,4 @@ namespace: default
 
 resources:
   - namespace.yaml
-  - volsync-restic-repo
-  - pihole
   - snapdrop

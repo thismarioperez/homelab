@@ -7,12 +7,3 @@
         name: nfs-common
         state: present
         update_cache: true
-    - name: Install open-iscsi for Longhorn
-      ansible.builtin.apt:
-        name: open-iscsi
-        state: present
-    - name: Ensure iscsid is enabled and running for Longhorn
-      ansible.builtin.systemd:
-        name: iscsid
-        enabled: true
-        state: started

@@ -61,14 +61,13 @@ where Traefik, MetalLB's speaker, and test workloads actually run.
 
 ### Persistent storage
 
-[Longhorn](https://longhorn.io) (`kubernetes/testlab/apps/longhorn`) is the
-default StorageClass for general-purpose PVCs. `defaultReplicaCount` is set
-to 1 since the cluster runs a single worker — Longhorn provides a CSI layer
-over local disk here, not replication/HA.
+k3s's built-in `local-path-provisioner` is the default StorageClass for
+general-purpose PVCs, backed by the worker's local disk.
 
-A separate `nfs.csi.k8s.io` StorageClass (non-default) is reserved for
-shared media mounts (Jellyfin, Sonarr/Radarr, downloaders, etc.), backed by
-a NAS rather than the worker's local disk.
+A separate `nfs.csi.k8s.io` StorageClass (`nfs-backups`, non-default,
+`kubernetes/testlab/apps/storage-system/csi-driver-nfs`) is reserved for
+shared/NFS-backed mounts (Jellyfin, Sonarr/Radarr, downloaders, etc.),
+backed by a NAS rather than the worker's local disk.
 
 ## lab
 
