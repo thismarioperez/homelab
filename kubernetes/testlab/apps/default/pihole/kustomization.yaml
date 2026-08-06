@@ -1,6 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+resources:
+  - replicationsource.yaml
+
 helmCharts:
   - name: pihole
     repo: oci://oci.trueforge.org/truecharts
@@ -17,18 +20,9 @@ helmCharts:
           ports:
             main:
               nodePort: 30980
-      # Labels mark these PVCs as recurring-job sources and put them in the
-      # "pihole-backup" group, targeted by the RecurringJob in
-      # recurringjob.yaml. PVC labels override any labels on the underlying
-      # Longhorn Volume.
+      # PVCs are backed up by VolSync — see replicationsource.yaml.
       persistence:
         config:
           size: 4Gi
-          labels:
-            recurring-job.longhorn.io/source: enabled
-            recurring-job-group.longhorn.io/pihole-backup: enabled
         dnsmasq:
           size: 1Gi
-          labels:
-            recurring-job.longhorn.io/source: enabled
-            recurring-job-group.longhorn.io/pihole-backup: enabled

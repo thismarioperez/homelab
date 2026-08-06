@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: security-system
+
+resources:
+  # kustomize --enable-helm skips this chart's crds/ dir (Helm's special
+  # CRD handling isn't picked up without --include-crds), so the
+  # OnePasswordItem CRD is vendored here directly.
+  - crds/onepassworditem.yaml
+
+helmCharts:
+  - name: connect
+    repo: https://1password.github.io/connect-helm-charts/
+    version: 2.4.1
+    releaseName: onepassword-connect
+    namespace: security-system
+    valuesInline:
+      # connect.credentialsName (op-credentials) and operator.token.name
+      # (onepassword-token) are bootstrapped manually out-of-band — see
+      # docs/kubernetes.md — since Connect must exist before it can manage
+      # its own bootstrap secret.
+      operator:
+        create: true

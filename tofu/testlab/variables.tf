@@ -1,7 +1,7 @@
 variable "node_name" {
   type        = string
   description = "Proxmox node to target"
-  default     = "pve"
+  default     = "ryujin"
 }
 
 variable "proxmox_endpoint" {

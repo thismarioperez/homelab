@@ -18,3 +18,13 @@ helmCharts:
         defaultReplicaCount: 1
       persistence:
         defaultClass: true
+      defaultBackupStore:
+        # Longhorn's CSI VolumeSnapshot implementation refuses to finalize
+        # any snapshot without a configured backup target, even when only
+        # used as VolSync's ephemeral staging step (copyMethod: Snapshot)
+        # rather than for Longhorn's own remote backups. This seeds a
+        # BackupTarget CR named "default" in longhorn-system on install
+        # (kubectl get backuptargets.longhorn.io -n longhorn-system).
+        # Points at a separate subdir from VolSync's own restic repo on
+        # the same NAS to avoid the two writing into the same path.
+        backupTarget: "nfs://10.30.10.4:/volume1/kubernetes/testlab/longhorn-backup-target"

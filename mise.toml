@@ -81,6 +81,11 @@ description = "de-provision k3s on all tofu/testlab hosts (k3s-io/k3s-ansible)"
 dir = "{{config_root}}/ansible"
 run = "ansible-playbook playbooks/k3s_uninstall.yml"
 
+[tasks."ansible:testlab:kubeconfig"]
+description = "fetch the testlab k3s kubeconfig to ansible/.cache/testlab-kubeconfig.yaml, pointed at the kube-vip apiserver VIP"
+dir = "{{config_root}}/ansible"
+run = "ansible-playbook playbooks/k3s_fetch_kubeconfig.yml"
+
 [tasks."kubernetes:testlab:render-metallb-config"]
 description = "render the MetalLB LB IP (from tofu/testlab's k3s_lb_ip output) into apps/metallb-system/lb.env if it hasn't been rendered yet — delete the file first to force a re-render after the reserved IP changes"
 dir = "{{config_root}}/tofu/testlab"
@@ -91,13 +96,26 @@ run = "test -f {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env || 
 description = "apply kubernetes manifests to the tofu/testlab k3s cluster"
 dir = "{{config_root}}/kubernetes"
 depends = ["kubernetes:testlab:render-metallb-config"]
+depends_post = ["kubernetes:testlab:apply-volsync"]
 run = "kubectl kustomize testlab --enable-helm | kubectl apply -f -"
+
+[tasks."kubernetes:testlab:apply-volsync"]
+description = "install VolSync via plain helm, bypassing kustomize --enable-helm: the backube/volsync chart's Deployment/Service/ServiceAccount/Role templates never set metadata.namespace or reference .Release.Namespace, so kustomize's namespace transformer has nothing to inject into (confirmed not fixable via valuesInline, patches, or parent-kustomization namespace — see apps/storage-system/kustomization.yaml)"
+run = "helm upgrade --install volsync volsync --repo https://backube.github.io/helm-charts/ --version 0.16.0 --namespace storage-system --create-namespace"
 
 [tasks."kubernetes:testlab:diff"]
 description = "diff kubernetes manifests against the tofu/testlab k3s cluster"
 dir = "{{config_root}}/kubernetes"
 depends = ["kubernetes:testlab:render-metallb-config"]
 run = "kubectl kustomize testlab --enable-helm | kubectl diff -f -"
+
+[tasks."kubernetes:testlab:bootstrap"]
+description = "one-time bootstrap of secrets that can't be managed in-cluster yet — currently 1Password Connect's own credentials into the security-system namespace (chicken-and-egg: Connect isn't running yet to manage these itself)"
+run = [
+  "kubectl create namespace security-system --dry-run=client -o yaml | kubectl apply -f -",
+  "op document get 'testlab-k3s Credentials File' --vault 'Home Network' | kubectl create secret generic op-credentials --from-file=1password-credentials.json=/dev/stdin -n security-system --dry-run=client -o yaml | kubectl apply -f -",
+  "kubectl create secret generic onepassword-token --from-literal=token=\"$(op item get 'testlab-k3s Access Token: Kubernetes Operator' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
+]
 
 [tasks."kubernetes:testlab:delete"]
 description = "delete kubernetes manifests from the tofu/testlab k3s cluster"

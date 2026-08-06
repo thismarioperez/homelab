@@ -1,0 +1,31 @@
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: pihole-config
+spec:
+  sourcePVC: pihole-config
+  trigger:
+    schedule: "0 3 * * *"
+  restic:
+    repository: volsync-restic-secret
+    copyMethod: Snapshot
+    volumeSnapshotClassName: longhorn
+    retain:
+      daily: 7
+      weekly: 4
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: pihole-dnsmasq
+spec:
+  sourcePVC: pihole-dnsmasq
+  trigger:
+    schedule: "0 3 * * *"
+  restic:
+    repository: volsync-restic-secret
+    copyMethod: Snapshot
+    volumeSnapshotClassName: longhorn
+    retain:
+      daily: 7
+      weekly: 4
