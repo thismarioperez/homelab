@@ -16,7 +16,11 @@ spec:
     capacity: 4Gi
     storageClassName: nfs-backups
     serviceType: ClusterIP
-  trigger:
-    # Manual trigger for a one-off restore/bootstrap; delete this
-    # ReplicationDestination once the fresh PVC is populated.
-    manual: restore-once
+  # No trigger: the rsync mover's Destination keeps its SSH server pod
+  # running continuously by default (per VolSync's own rsync docs) — it's
+  # a listener, not a periodic job. The ReplicationSource's schedule is
+  # what drives each sync. A trigger.manual here (as the generic
+  # examples/replicationdestination.yaml uses) is only correct for a true
+  # one-off restore, since VolSync tears the listener down between manual
+  # syncs once lastManualSync catches up — which silently breaks the
+  # Source's scheduled pushes.
