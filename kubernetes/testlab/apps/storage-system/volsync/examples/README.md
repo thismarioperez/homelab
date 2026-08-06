@@ -31,6 +31,14 @@ VolSync's rsync mover pairs a `ReplicationDestination` (SSH server) with a
 it generates the SSH keypair `Secret` and Service address that the Source
 needs to reference — there's no way to create both at once.
 
+`replicationdestination.yaml` has no `trigger` set, so its SSH listener pod
+stays up continuously — this is the correct shape for an ongoing backup
+relationship, where the Source's `trigger.schedule` drives each sync. Only
+add a `trigger.manual` to the Destination if it's for a genuine one-off
+restore with no ongoing Source (see the comment in that file); doing so for
+an ongoing relationship tears the listener down after the first sync and
+scheduled pushes start failing with `ssh: connect ... Connection refused`.
+
 1. Copy and adapt `replicationdestination.yaml` for the real app (rename,
    adjust `capacity`), then apply it:
 

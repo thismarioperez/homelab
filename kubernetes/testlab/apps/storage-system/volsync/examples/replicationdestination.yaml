@@ -13,7 +13,12 @@ spec:
     capacity: 5Gi
     storageClassName: nfs-backups
     serviceType: ClusterIP
-  trigger:
-    # Manual trigger for a one-off restore/bootstrap; delete this
-    # ReplicationDestination once the fresh PVC is populated.
-    manual: restore-once
+  # No trigger: the rsync mover's Destination keeps its SSH server pod
+  # running continuously by default — it's a listener, not a periodic job.
+  # The paired ReplicationSource's schedule is what drives each sync.
+  #
+  # Only add `trigger: {manual: restore-once}` here if this
+  # ReplicationDestination exists purely for a one-off restore (no ongoing
+  # ReplicationSource pushing to it) — a manual trigger tears the listener
+  # pod down once `status.lastManualSync` catches up, which silently
+  # breaks any scheduled Source relying on it still being up.
