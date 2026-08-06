@@ -126,11 +126,10 @@ run = [
 ]
 
 [tasks."kubernetes:testlab:bootstrap"]
-description = "one-time bootstrap of secrets that can't be managed in-cluster yet — currently 1Password Connect's own credentials into the security-system namespace (chicken-and-egg: Connect isn't running yet to manage these itself)"
+description = "one-time bootstrap of secrets that can't be managed in-cluster yet — currently ESO's own 1Password service account token into the security-system namespace (chicken-and-egg: ESO isn't running yet to manage this itself)"
 run = [
   "kubectl create namespace security-system --dry-run=client -o yaml | kubectl apply -f -",
-  "op document get 'testlab-k3s Credentials File' --vault 'Home Network' | kubectl create secret generic op-credentials --from-file=1password-credentials.json=/dev/stdin -n security-system --dry-run=client -o yaml | kubectl apply -f -",
-  "kubectl create secret generic onepassword-token --from-literal=token=\"$(op item get 'testlab-k3s Access Token: Kubernetes Operator' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
+  "kubectl create secret generic onepassword-service-account-token --from-literal=token=\"$(op item get 'Service Account Auth Token: testlab k3s eso' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
 ]
 
 [tasks."kubernetes:testlab:delete"]

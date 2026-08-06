@@ -8,8 +8,8 @@ release can hit apply-ordering issues) and gives one clear pre-flight step
 for standing up a fresh cluster.
 
 `helmfile.yaml` in this directory lists the charts that bundle CRDs
-(currently MetalLB, csi-driver-nfs, External Secrets Operator — see the
-comment in that file for why others are excluded). It is
+(currently MetalLB, csi-driver-nfs, External Secrets Operator, VolSync —
+see the comment in that file for why others are excluded). It is
 never `helmfile sync`'d; it exists only so `helmfile template` can render
 each chart and its CRDs can be scraped out:
 
