@@ -13,12 +13,6 @@
       "skillPath": "skills/homelab-network-setup/SKILL.md",
       "computedHash": "5f1f2c87205c863a6405f678f418a3a5b3ff88cf627714a8cba19e82b2f4af12"
     },
-    "homelab-pihole-dns": {
-      "source": "affaan-m/everything-claude-code",
-      "sourceType": "github",
-      "skillPath": "skills/homelab-pihole-dns/SKILL.md",
-      "computedHash": "2847910fe4de789629f604bf0a3bca11154dfa7db7d6c9bf2552510bd31c1f90"
-    },
     "homelab-vlan-segmentation": {
       "source": "affaan-m/everything-claude-code",
       "sourceType": "github",

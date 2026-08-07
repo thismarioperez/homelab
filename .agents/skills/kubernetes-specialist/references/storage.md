@@ -85,7 +85,7 @@ spec:
     storage: 100Gi
   volumeMode: Filesystem
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: manual
   hostPath:
@@ -93,11 +93,11 @@ spec:
   nodeAffinity:
     required:
       nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - node-01
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-01
 ```
 
 ## PersistentVolumeClaim Patterns
@@ -114,7 +114,7 @@ metadata:
     app: postgres
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   storageClassName: fast-ssd
   resources:
     requests:
@@ -131,7 +131,7 @@ metadata:
   namespace: production
 spec:
   accessModes:
-  - ReadWriteMany
+    - ReadWriteMany
   storageClassName: nfs-storage
   resources:
     requests:
@@ -148,7 +148,7 @@ metadata:
   namespace: production
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   volumeMode: Block
   storageClassName: fast-ssd
   resources:
@@ -167,15 +167,15 @@ metadata:
   name: database-pod
 spec:
   containers:
-  - name: postgres
-    image: postgres:15
-    volumeMounts:
-    - name: data
-      mountPath: /var/lib/postgresql/data
+    - name: postgres
+      image: postgres:15
+      volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
   volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: database-pvc
+    - name: data
+      persistentVolumeClaim:
+        claimName: database-pvc
 ```
 
 ### Multiple PVCs
@@ -187,25 +187,25 @@ metadata:
   name: app-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: data
-      mountPath: /data
-    - name: logs
-      mountPath: /var/log/app
-    - name: shared
-      mountPath: /shared
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /var/log/app
+        - name: shared
+          mountPath: /shared
   volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: app-data-pvc
-  - name: logs
-    persistentVolumeClaim:
-      claimName: app-logs-pvc
-  - name: shared
-    persistentVolumeClaim:
-      claimName: shared-assets
+    - name: data
+      persistentVolumeClaim:
+        claimName: app-data-pvc
+    - name: logs
+      persistentVolumeClaim:
+        claimName: app-logs-pvc
+    - name: shared
+      persistentVolumeClaim:
+        claimName: shared-assets
 ```
 
 ## StatefulSet with VolumeClaimTemplates
@@ -228,30 +228,30 @@ spec:
         app: postgres
     spec:
       containers:
-      - name: postgres
-        image: postgres:15-alpine
-        ports:
-        - containerPort: 5432
-        volumeMounts:
-        - name: data
-          mountPath: /var/lib/postgresql/data
-        - name: config
-          mountPath: /etc/postgresql
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /etc/postgresql
       volumes:
-      - name: config
-        configMap:
-          name: postgres-config
+        - name: config
+          configMap:
+            name: postgres-config
   volumeClaimTemplates:
-  - metadata:
-      name: data
-      labels:
-        app: postgres
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      storageClassName: fast-ssd
-      resources:
-        requests:
-          storage: 50Gi
+    - metadata:
+        name: data
+        labels:
+          app: postgres
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd
+        resources:
+          requests:
+            storage: 50Gi
 ```
 
 ## Volume Snapshots
@@ -293,7 +293,7 @@ metadata:
   namespace: production
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   storageClassName: fast-ssd
   dataSource:
     name: database-snapshot-20231214
@@ -323,11 +323,11 @@ metadata:
   name: database-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   storageClassName: fast-ssd
   resources:
     requests:
-      storage: 100Gi  # Increased from 50Gi
+      storage: 100Gi # Increased from 50Gi
 ```
 
 ## EmptyDir Volumes
@@ -341,16 +341,16 @@ metadata:
   name: cache-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: cache
-      mountPath: /cache
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: cache
+          mountPath: /cache
   volumes:
-  - name: cache
-    emptyDir:
-      medium: Memory
-      sizeLimit: 1Gi
+    - name: cache
+      emptyDir:
+        medium: Memory
+        sizeLimit: 1Gi
 ```
 
 ### Disk-Backed EmptyDir
@@ -362,15 +362,15 @@ metadata:
   name: worker-pod
 spec:
   containers:
-  - name: worker
-    image: worker:latest
-    volumeMounts:
-    - name: scratch
-      mountPath: /tmp/scratch
+    - name: worker
+      image: worker:latest
+      volumeMounts:
+        - name: scratch
+          mountPath: /tmp/scratch
   volumes:
-  - name: scratch
-    emptyDir:
-      sizeLimit: 10Gi
+    - name: scratch
+      emptyDir:
+        sizeLimit: 10Gi
 ```
 
 ## ConfigMap and Secret Volumes
@@ -382,30 +382,30 @@ metadata:
   name: app-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: config
-      mountPath: /etc/config
-      readOnly: true
-    - name: secrets
-      mountPath: /etc/secrets
-      readOnly: true
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+        - name: secrets
+          mountPath: /etc/secrets
+          readOnly: true
   volumes:
-  - name: config
-    configMap:
-      name: app-config
-      items:
-      - key: app.yaml
-        path: config.yaml
-        mode: 0644
-  - name: secrets
-    secret:
-      secretName: app-secrets
-      defaultMode: 0400
-      items:
-      - key: db-password
-        path: database/password
+    - name: config
+      configMap:
+        name: app-config
+        items:
+          - key: app.yaml
+            path: config.yaml
+            mode: 0644
+    - name: secrets
+      secret:
+        secretName: app-secrets
+        defaultMode: 0400
+        items:
+          - key: db-password
+            path: database/password
 ```
 
 ## Projected Volumes
@@ -417,34 +417,34 @@ metadata:
   name: projected-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: combined
-      mountPath: /combined
-      readOnly: true
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: combined
+          mountPath: /combined
+          readOnly: true
   volumes:
-  - name: combined
-    projected:
-      sources:
-      - secret:
-          name: app-secrets
-          items:
-          - key: password
-            path: secrets/password
-      - configMap:
-          name: app-config
-          items:
-          - key: config.yaml
-            path: config/app.yaml
-      - downwardAPI:
-          items:
-          - path: pod/labels
-            fieldRef:
-              fieldPath: metadata.labels
-          - path: pod/annotations
-            fieldRef:
-              fieldPath: metadata.annotations
+    - name: combined
+      projected:
+        sources:
+          - secret:
+              name: app-secrets
+              items:
+                - key: password
+                  path: secrets/password
+          - configMap:
+              name: app-config
+              items:
+                - key: config.yaml
+                  path: config/app.yaml
+          - downwardAPI:
+              items:
+                - path: pod/labels
+                  fieldRef:
+                    fieldPath: metadata.labels
+                - path: pod/annotations
+                  fieldRef:
+                    fieldPath: metadata.annotations
 ```
 
 ## CSI Driver Examples
@@ -458,19 +458,19 @@ metadata:
   name: app-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: data
-      mountPath: /data
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: data
+          mountPath: /data
   volumes:
-  - name: data
-    csi:
-      driver: ebs.csi.aws.com
-      volumeAttributes:
-        type: gp3
-        iops: "3000"
-        encrypted: "true"
+    - name: data
+      csi:
+        driver: ebs.csi.aws.com
+        volumeAttributes:
+          type: gp3
+          iops: "3000"
+          encrypted: "true"
 ```
 
 ### Secrets Store CSI Driver
@@ -483,19 +483,19 @@ metadata:
 spec:
   serviceAccountName: app-sa
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: secrets-store
-      mountPath: /mnt/secrets
-      readOnly: true
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: secrets-store
+          mountPath: /mnt/secrets
+          readOnly: true
   volumes:
-  - name: secrets-store
-    csi:
-      driver: secrets-store.csi.k8s.io
-      readOnly: true
-      volumeAttributes:
-        secretProviderClass: aws-secrets
+    - name: secrets-store
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: aws-secrets
 ```
 
 ## HostPath Volumes (Use with Caution)
@@ -507,29 +507,29 @@ metadata:
   name: privileged-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    - name: host-data
-      mountPath: /host-data
-    securityContext:
-      privileged: true
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        - name: host-data
+          mountPath: /host-data
+      securityContext:
+        privileged: true
   volumes:
-  - name: host-data
-    hostPath:
-      path: /data
-      type: DirectoryOrCreate
+    - name: host-data
+      hostPath:
+        path: /data
+        type: DirectoryOrCreate
 ```
 
 ## Best Practices
 
 1. **Dynamic Provisioning**: Prefer dynamic provisioning with StorageClasses
-1. **Access Modes**: Use correct access mode (RWO for single node, RWX for multi-node)
-1. **Reclaim Policy**: Use Retain for critical data, Delete for temporary
-1. **Backup**: Regular snapshots and offsite backups
-1. **Monitoring**: Monitor disk usage and performance metrics
-1. **Expansion**: Enable volume expansion in StorageClass
-1. **Performance**: Choose appropriate storage type for workload
-1. **Security**: Encrypt volumes at rest and in transit
-1. **Limits**: Set size limits on emptyDir volumes
-1. **Labels**: Label PVCs for organization and backup policies
+2. **Access Modes**: Use correct access mode (RWO for single node, RWX for multi-node)
+3. **Reclaim Policy**: Use Retain for critical data, Delete for temporary
+4. **Backup**: Regular snapshots and offsite backups
+5. **Monitoring**: Monitor disk usage and performance metrics
+6. **Expansion**: Enable volume expansion in StorageClass
+7. **Performance**: Choose appropriate storage type for workload
+8. **Security**: Encrypt volumes at rest and in transit
+9. **Limits**: Set size limits on emptyDir volumes
+10. **Labels**: Label PVCs for organization and backup policies

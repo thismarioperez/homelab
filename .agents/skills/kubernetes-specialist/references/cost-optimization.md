@@ -1,6 +1,6 @@
 # Cost Optimization
 
-______________________________________________________________________
+---
 
 ## Resource Right-Sizing
 
@@ -371,7 +371,7 @@ metadata:
   name: scale-down-dev
   namespace: development
 spec:
-  schedule: "0 20 * * 1-5"  # 8 PM Mon-Fri
+  schedule: "0 20 * * 1-5" # 8 PM Mon-Fri
   jobTemplate:
     spec:
       template:
@@ -393,7 +393,7 @@ metadata:
   name: scale-up-dev
   namespace: development
 spec:
-  schedule: "0 8 * * 1-5"  # 8 AM Mon-Fri
+  schedule: "0 8 * * 1-5" # 8 AM Mon-Fri
   jobTemplate:
     spec:
       template:
@@ -445,14 +445,14 @@ spec:
 ## Best Practices
 
 1. **Set resource requests** on all containers (enables efficient scheduling)
-1. **Use VPA recommendations** to right-size workloads
-1. **Tune HPA stabilization** to prevent thrashing
-1. **Leverage spot instances** for fault-tolerant workloads
-1. **Implement PDBs** to maintain availability during disruptions
-1. **Set namespace quotas** to prevent resource hogging
-1. **Use LimitRanges** to enforce sensible defaults
-1. **Label resources** for cost attribution
-1. **Schedule dev environments** to scale down off-hours
-1. **Monitor with Kubecost** or cloud cost tools
-1. **Use priority classes** to ensure critical workloads run
-1. **Review unused resources** regularly (idle deployments, orphaned PVCs)
+2. **Use VPA recommendations** to right-size workloads
+3. **Tune HPA stabilization** to prevent thrashing
+4. **Leverage spot instances** for fault-tolerant workloads
+5. **Implement PDBs** to maintain availability during disruptions
+6. **Set namespace quotas** to prevent resource hogging
+7. **Use LimitRanges** to enforce sensible defaults
+8. **Label resources** for cost attribution
+9. **Schedule dev environments** to scale down off-hours
+10. **Monitor with Kubecost** or cloud cost tools
+11. **Use priority classes** to ensure critical workloads run
+12. **Review unused resources** regularly (idle deployments, orphaned PVCs)

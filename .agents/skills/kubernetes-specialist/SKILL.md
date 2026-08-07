@@ -1,6 +1,17 @@
-______________________________________________________________________
-
-## name: kubernetes-specialist description: Use when deploying or managing Kubernetes workloads. Invoke to create deployment manifests, configure pod security policies, set up service accounts, define network isolation rules, debug pod crashes, analyze resource limits, inspect container logs, or right-size workloads. Use for Helm charts, RBAC policies, NetworkPolicies, storage configuration, performance optimization, GitOps pipelines, and multi-cluster management. license: MIT metadata: author: https://github.com/Jeffallan version: "1.1.1" domain: infrastructure triggers: Kubernetes, K8s, kubectl, Helm, container orchestration, pod deployment, RBAC, NetworkPolicy, Ingress, StatefulSet, Operator, CRD, CustomResourceDefinition, ArgoCD, Flux, GitOps, Istio, Linkerd, service mesh, multi-cluster, cost optimization, VPA, spot instances role: specialist scope: infrastructure output-format: manifests related-skills: devops-engineer, cloud-architect, sre-engineer, terraform-engineer, security-reviewer, chaos-engineer
+---
+name: kubernetes-specialist
+description: Use when deploying or managing Kubernetes workloads. Invoke to create deployment manifests, configure pod security policies, set up service accounts, define network isolation rules, debug pod crashes, analyze resource limits, inspect container logs, or right-size workloads. Use for Helm charts, RBAC policies, NetworkPolicies, storage configuration, performance optimization, GitOps pipelines, and multi-cluster management.
+license: MIT
+metadata:
+  author: https://github.com/Jeffallan
+  version: "1.1.1"
+  domain: infrastructure
+  triggers: Kubernetes, K8s, kubectl, Helm, container orchestration, pod deployment, RBAC, NetworkPolicy, Ingress, StatefulSet, Operator, CRD, CustomResourceDefinition, ArgoCD, Flux, GitOps, Istio, Linkerd, service mesh, multi-cluster, cost optimization, VPA, spot instances
+  role: specialist
+  scope: infrastructure
+  output-format: manifests
+  related-skills: devops-engineer, cloud-architect, sre-engineer, terraform-engineer, security-reviewer, chaos-engineer
+---
 
 # Kubernetes Specialist
 
@@ -17,10 +28,10 @@ ______________________________________________________________________
 ## Core Workflow
 
 1. **Analyze requirements** — Understand workload characteristics, scaling needs, security requirements
-1. **Design architecture** — Choose workload types, networking patterns, storage solutions
-1. **Implement manifests** — Create declarative YAML with proper resource limits, health checks
-1. **Secure** — Apply RBAC, NetworkPolicies, Pod Security Standards, least privilege
-1. **Validate** — Run `kubectl rollout status`, `kubectl get pods -w`, and `kubectl describe pod <name>` to confirm health; roll back with `kubectl rollout undo` if needed
+2. **Design architecture** — Choose workload types, networking patterns, storage solutions
+3. **Implement manifests** — Create declarative YAML with proper resource limits, health checks
+4. **Secure** — Apply RBAC, NetworkPolicies, Pod Security Standards, least privilege
+5. **Validate** — Run `kubectl rollout status`, `kubectl get pods -w`, and `kubectl describe pod <name>` to confirm health; roll back with `kubectl rollout undo` if needed
 
 ## Reference Guide
 
@@ -89,14 +100,14 @@ spec:
         app: my-app
         version: "1.2.3"
     spec:
-      serviceAccountName: my-app-sa   # never use default SA
+      serviceAccountName: my-app-sa # never use default SA
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 2000
       containers:
         - name: my-app
-          image: my-registry/my-app:1.2.3   # never use latest
+          image: my-registry/my-app:1.2.3 # never use latest
           ports:
             - containerPort: 8080
           resources:
@@ -125,7 +136,7 @@ spec:
               drop: ["ALL"]
           envFrom:
             - secretRef:
-                name: my-app-secret   # pull credentials from Secret, not ConfigMap
+                name: my-app-secret # pull credentials from Secret, not ConfigMap
 ```
 
 ### Minimal RBAC (least privilege)
@@ -145,7 +156,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
-    verbs: ["get", "list"]   # grant only what is needed
+    verbs: ["get", "list"] # grant only what is needed
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -228,8 +239,8 @@ kubectl rollout undo deployment/my-app -n my-namespace
 When implementing Kubernetes resources, provide:
 
 1. Complete YAML manifests with proper structure
-1. RBAC configuration if needed (ServiceAccount, Role, RoleBinding)
-1. NetworkPolicy for network isolation
-1. Brief explanation of design decisions and security considerations
+2. RBAC configuration if needed (ServiceAccount, Role, RoleBinding)
+3. NetworkPolicy for network isolation
+4. Brief explanation of design decisions and security considerations
 
 [Documentation](https://jeffallan.github.io/claude-skills/skills/infrastructure/kubernetes-specialist/)

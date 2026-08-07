@@ -164,33 +164,33 @@ metadata:
   name: app-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    env:
-    # Single value from ConfigMap
-    - name: DATABASE_HOST
-      valueFrom:
-        configMapKeyRef:
-          name: app-config
-          key: database.host
+    - name: app
+      image: myapp:latest
+      env:
+        # Single value from ConfigMap
+        - name: DATABASE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database.host
 
-    # Single value from Secret
-    - name: DATABASE_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: app-secrets
-          key: db-password
+        # Single value from Secret
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: db-password
 
-    # All keys from ConfigMap as env vars
-    envFrom:
-    - configMapRef:
-        name: app-config
-      prefix: CONFIG_
+      # All keys from ConfigMap as env vars
+      envFrom:
+        - configMapRef:
+            name: app-config
+          prefix: CONFIG_
 
-    # All keys from Secret as env vars
-    - secretRef:
-        name: app-secrets
-      prefix: SECRET_
+        # All keys from Secret as env vars
+        - secretRef:
+            name: app-secrets
+          prefix: SECRET_
 ```
 
 ### Volume Mounts
@@ -202,50 +202,50 @@ metadata:
   name: app-pod
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    volumeMounts:
-    # Mount entire ConfigMap as directory
-    - name: config-volume
-      mountPath: /etc/config
-      readOnly: true
+    - name: app
+      image: myapp:latest
+      volumeMounts:
+        # Mount entire ConfigMap as directory
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
 
-    # Mount specific key as file
-    - name: app-properties
-      mountPath: /etc/app/app.properties
-      subPath: app.properties
-      readOnly: true
+        # Mount specific key as file
+        - name: app-properties
+          mountPath: /etc/app/app.properties
+          subPath: app.properties
+          readOnly: true
 
-    # Mount Secret as files
-    - name: secrets-volume
-      mountPath: /etc/secrets
-      readOnly: true
+        # Mount Secret as files
+        - name: secrets-volume
+          mountPath: /etc/secrets
+          readOnly: true
 
-    # Mount TLS certificates
-    - name: tls-certs
-      mountPath: /etc/tls
-      readOnly: true
+        # Mount TLS certificates
+        - name: tls-certs
+          mountPath: /etc/tls
+          readOnly: true
 
   volumes:
-  - name: config-volume
-    configMap:
-      name: app-config
+    - name: config-volume
+      configMap:
+        name: app-config
 
-  - name: app-properties
-    configMap:
-      name: app-config
-      items:
-      - key: app.properties
-        path: app.properties
+    - name: app-properties
+      configMap:
+        name: app-config
+        items:
+          - key: app.properties
+            path: app.properties
 
-  - name: secrets-volume
-    secret:
-      secretName: app-secrets
-      defaultMode: 0400  # Read-only for owner
+    - name: secrets-volume
+      secret:
+        secretName: app-secrets
+        defaultMode: 0400 # Read-only for owner
 
-  - name: tls-certs
-    secret:
-      secretName: example-tls
+    - name: tls-certs
+      secret:
+        secretName: example-tls
 ```
 
 ## Immutable ConfigMaps and Secrets
@@ -288,12 +288,12 @@ spec:
     name: app-secrets
     creationPolicy: Owner
   data:
-  - secretKey: db-password
-    remoteRef:
-      key: prod/database/password
-  - secretKey: api-key
-    remoteRef:
-      key: prod/api/key
+    - secretKey: db-password
+      remoteRef:
+        key: prod/database/password
+    - secretKey: api-key
+      remoteRef:
+        key: prod/api/key
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: SecretStore
@@ -341,73 +341,73 @@ metadata:
   name: app
 spec:
   containers:
-  - name: app
-    image: myapp:latest
-    env:
-    # Application settings
-    - name: APP_NAME
-      value: "my-application"
-    - name: APP_ENV
-      value: "production"
-    - name: APP_VERSION
-      value: "v1.2.0"
+    - name: app
+      image: myapp:latest
+      env:
+        # Application settings
+        - name: APP_NAME
+          value: "my-application"
+        - name: APP_ENV
+          value: "production"
+        - name: APP_VERSION
+          value: "v1.2.0"
 
-    # Database configuration
-    - name: DB_HOST
-      valueFrom:
-        configMapKeyRef:
-          name: app-config
-          key: database.host
-    - name: DB_PORT
-      valueFrom:
-        configMapKeyRef:
-          name: app-config
-          key: database.port
-    - name: DB_NAME
-      valueFrom:
-        configMapKeyRef:
-          name: app-config
-          key: database.name
-    - name: DB_USER
-      valueFrom:
-        secretKeyRef:
-          name: app-secrets
-          key: db-username
-    - name: DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: app-secrets
-          key: db-password
+        # Database configuration
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database.host
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database.port
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database.name
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: db-username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: db-password
 
-    # Kubernetes metadata
-    - name: POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: POD_NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-    - name: POD_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.podIP
-    - name: NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
+        # Kubernetes metadata
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
 
-    # Resource limits
-    - name: MEMORY_LIMIT
-      valueFrom:
-        resourceFieldRef:
-          containerName: app
-          resource: limits.memory
-    - name: CPU_REQUEST
-      valueFrom:
-        resourceFieldRef:
-          containerName: app
-          resource: requests.cpu
+        # Resource limits
+        - name: MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: app
+              resource: limits.memory
+        - name: CPU_REQUEST
+          valueFrom:
+            resourceFieldRef:
+              containerName: app
+              resource: requests.cpu
 ```
 
 ## Dynamic Configuration Updates
@@ -422,31 +422,31 @@ spec:
     metadata:
       annotations:
         # Force pod restart on config change
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: { { include (print $.Template.BasePath "/configmap.yaml") . | sha256sum } }
+        checksum/secret: { { include (print $.Template.BasePath "/secret.yaml") . | sha256sum } }
     spec:
       containers:
-      - name: app
-        image: myapp:latest
-        volumeMounts:
-        - name: config
-          mountPath: /etc/config
-          readOnly: true
+        - name: app
+          image: myapp:latest
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config
+              readOnly: true
       volumes:
-      - name: config
-        configMap:
-          name: app-config
+        - name: config
+          configMap:
+            name: app-config
 ```
 
 ## Best Practices
 
 1. **Separation**: Use ConfigMaps for non-sensitive data, Secrets for credentials
-1. **Immutability**: Mark production configs as immutable for safety
-1. **Versioning**: Include version in ConfigMap/Secret names for updates
-1. **Least Privilege**: Mount secrets as files with restrictive permissions (0400)
-1. **External Secrets**: Use External Secrets Operator for cloud secret managers
-1. **No Hardcoding**: Never hardcode secrets in container images
-1. **Encryption**: Enable encryption at rest for Secrets in etcd
-1. **GitOps**: Use Sealed Secrets for safe GitOps workflows
-1. **Rotation**: Implement secret rotation strategies
-1. **Validation**: Validate configuration before deployment
+2. **Immutability**: Mark production configs as immutable for safety
+3. **Versioning**: Include version in ConfigMap/Secret names for updates
+4. **Least Privilege**: Mount secrets as files with restrictive permissions (0400)
+5. **External Secrets**: Use External Secrets Operator for cloud secret managers
+6. **No Hardcoding**: Never hardcode secrets in container images
+7. **Encryption**: Enable encryption at rest for Secrets in etcd
+8. **GitOps**: Use Sealed Secrets for safe GitOps workflows
+9. **Rotation**: Implement secret rotation strategies
+10. **Validation**: Validate configuration before deployment

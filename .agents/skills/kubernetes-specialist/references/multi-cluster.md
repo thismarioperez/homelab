@@ -1,6 +1,6 @@
 # Multi-Cluster Management
 
-______________________________________________________________________
+---
 
 ## Cluster API
 
@@ -322,7 +322,7 @@ spec:
             environment: production
   template:
     metadata:
-      name: 'myapp-{{name}}'
+      name: "myapp-{{name}}"
     spec:
       project: default
       source:
@@ -330,7 +330,7 @@ spec:
         targetRevision: main
         path: overlays/production
       destination:
-        server: '{{server}}'
+        server: "{{server}}"
         namespace: production
       syncPolicy:
         automated:
@@ -371,7 +371,7 @@ spec:
     storageLocation: default
     volumeSnapshotLocations:
       - default
-    ttl: 720h  # 30 days
+    ttl: 720h # 30 days
 ---
 # Restore to different cluster
 apiVersion: velero.io/v1
@@ -494,14 +494,14 @@ kubectx us-west
 ## Best Practices
 
 1. **Use Cluster API** for declarative cluster lifecycle management
-1. **Implement service mesh** for secure cross-cluster communication
-1. **Set up DNS-based routing** for global service discovery
-1. **Configure automated backups** with Velero across clusters
-1. **Use GitOps** (ArgoCD/Flux) for consistent multi-cluster deployments
-1. **Implement network policies** consistently across clusters
-1. **Centralize observability** with cross-cluster metrics and logs
-1. **Test failover procedures** regularly
-1. **Use namespaces consistently** across clusters
-1. **Document cluster topology** and dependencies
-1. **Implement RBAC** with cross-cluster access patterns
-1. **Monitor cluster health** from centralized dashboard
+2. **Implement service mesh** for secure cross-cluster communication
+3. **Set up DNS-based routing** for global service discovery
+4. **Configure automated backups** with Velero across clusters
+5. **Use GitOps** (ArgoCD/Flux) for consistent multi-cluster deployments
+6. **Implement network policies** consistently across clusters
+7. **Centralize observability** with cross-cluster metrics and logs
+8. **Test failover procedures** regularly
+9. **Use namespaces consistently** across clusters
+10. **Document cluster topology** and dependencies
+11. **Implement RBAC** with cross-cluster access patterns
+12. **Monitor cluster health** from centralized dashboard

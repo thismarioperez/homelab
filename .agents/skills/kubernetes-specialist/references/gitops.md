@@ -1,13 +1,13 @@
 # GitOps
 
-______________________________________________________________________
+---
 
 ## GitOps Principles
 
 1. **Declarative** - Entire system described declaratively
-1. **Versioned and immutable** - Desired state stored in Git
-1. **Pulled automatically** - Agents pull state from Git
-1. **Continuously reconciled** - Agents ensure actual matches desired
+2. **Versioned and immutable** - Desired state stored in Git
+3. **Pulled automatically** - Agents pull state from Git
+4. **Continuously reconciled** - Agents ensure actual matches desired
 
 ## ArgoCD Installation
 
@@ -94,16 +94,16 @@ spec:
             revision: main
   template:
     metadata:
-      name: 'myapp-{{cluster}}'
+      name: "myapp-{{cluster}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/myorg/myapp-manifests.git
-        targetRevision: '{{revision}}'
-        path: 'overlays/{{cluster}}'
+        targetRevision: "{{revision}}"
+        path: "overlays/{{cluster}}"
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{namespace}}'
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           prune: true
@@ -151,20 +151,20 @@ metadata:
 spec:
   description: Production applications
   sourceRepos:
-    - 'https://github.com/myorg/*'
-    - 'https://charts.example.com'
+    - "https://github.com/myorg/*"
+    - "https://charts.example.com"
   destinations:
     - namespace: production
       server: https://kubernetes.default.svc
     - namespace: production-*
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-    - group: ''
+    - group: ""
       kind: Namespace
   namespaceResourceBlacklist:
-    - group: ''
+    - group: ""
       kind: ResourceQuota
-    - group: ''
+    - group: ""
       kind: LimitRange
   roles:
     - name: developer
@@ -275,7 +275,7 @@ spec:
   chart:
     spec:
       chart: redis
-      version: '17.x'
+      version: "17.x"
       sourceRef:
         kind: HelmRepository
         name: bitnami
@@ -314,7 +314,7 @@ spec:
     name: myapp
   policy:
     semver:
-      range: '>=1.0.0'
+      range: ">=1.0.0"
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta1
 kind: ImageUpdateAutomation
@@ -334,7 +334,7 @@ spec:
       author:
         email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
-      messageTemplate: 'Update image to {{.NewTag}}'
+      messageTemplate: "Update image to {{.NewTag}}"
     push:
       branch: main
   update:
@@ -347,7 +347,6 @@ spec:
 ```yaml
 # Install Flagger
 kubectl apply -k github.com/fluxcd/flagger/kustomize/istio
-
 ---
 apiVersion: flagger.app/v1beta1
 kind: Canary
@@ -521,12 +520,12 @@ fleet-infra/
 ## Best Practices
 
 1. **Use separate repos** for app code and manifests
-1. **Protect main branch** with required reviews
-1. **Use sealed secrets or SOPS** for sensitive data
-1. **Enable auto-sync with prune** for drift correction
-1. **Set up notifications** for sync failures
-1. **Use ApplicationSets/Kustomizations** for multi-environment
-1. **Implement progressive delivery** for safe rollouts
-1. **Version your Helm charts** semantically
-1. **Keep manifests DRY** with Kustomize overlays
-1. **Monitor reconciliation metrics** and alerts
+2. **Protect main branch** with required reviews
+3. **Use sealed secrets or SOPS** for sensitive data
+4. **Enable auto-sync with prune** for drift correction
+5. **Set up notifications** for sync failures
+6. **Use ApplicationSets/Kustomizations** for multi-environment
+7. **Implement progressive delivery** for safe rollouts
+8. **Version your Helm charts** semantically
+9. **Keep manifests DRY** with Kustomize overlays
+10. **Monitor reconciliation metrics** and alerts

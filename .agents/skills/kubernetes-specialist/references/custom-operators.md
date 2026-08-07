@@ -1,6 +1,6 @@
 # Custom Operators
 
-______________________________________________________________________
+---
 
 ## CustomResourceDefinition (CRD)
 
@@ -43,7 +43,7 @@ spec:
                   type: string
                 storage:
                   type: string
-                  pattern: '^[0-9]+Gi$'
+                  pattern: "^[0-9]+Gi$"
                 replicas:
                   type: integer
                   minimum: 1
@@ -552,12 +552,12 @@ make undeploy
 ## Best Practices
 
 1. **Use finalizers** for cleanup of external resources before CR deletion
-1. **Set owner references** so owned resources are garbage collected with the CR
-1. **Implement idempotent reconciliation** - same input should produce same output
-1. **Use status subresource** to separate desired state (spec) from observed state (status)
-1. **Add validation** via OpenAPI schema or webhooks
-1. **Emit events** for significant state changes
-1. **Use leader election** for high availability
-1. **Set resource limits** on the operator deployment
-1. **Follow least privilege** RBAC principles
-1. **Test with envtest** for unit testing controllers
+2. **Set owner references** so owned resources are garbage collected with the CR
+3. **Implement idempotent reconciliation** - same input should produce same output
+4. **Use status subresource** to separate desired state (spec) from observed state (status)
+5. **Add validation** via OpenAPI schema or webhooks
+6. **Emit events** for significant state changes
+7. **Use leader election** for high availability
+8. **Set resource limits** on the operator deployment
+9. **Follow least privilege** RBAC principles
+10. **Test with envtest** for unit testing controllers

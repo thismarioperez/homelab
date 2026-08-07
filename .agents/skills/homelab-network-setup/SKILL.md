@@ -1,6 +1,9 @@
-______________________________________________________________________
-
-## name: homelab-network-setup description: Practical home and homelab network planning for gateways, switches, access points, IP ranges, DHCP reservations, DNS, cabling, and common beginner mistakes. metadata: origin: community
+---
+name: homelab-network-setup
+description: Practical home and homelab network planning for gateways, switches, access points, IP ranges, DHCP reservations, DNS, cabling, and common beginner mistakes.
+metadata:
+  origin: community
+---
 
 # Homelab Network Setup
 
@@ -98,9 +101,9 @@ switch-01.home.arpa
 Goal: Keep the ISP router but stabilize a small lab.
 
 1. Set DHCP reservations for NAS, Pi, and any SSH hosts.
-1. Move local names to `home.arpa`.
-1. Disable duplicate DHCP servers on secondary routers or APs.
-1. Wire the main AP instead of relying on wireless backhaul.
+2. Move local names to `home.arpa`.
+3. Disable duplicate DHCP servers on secondary routers or APs.
+4. Wire the main AP instead of relying on wireless backhaul.
 
 ### VLAN-Ready Plan
 
@@ -108,9 +111,9 @@ Goal: Prepare for future segmentation without enabling it immediately.
 
 1. Choose non-overlapping /24 ranges for trusted, IoT, servers, guest, and
    management.
-1. Reserve .1 for the gateway and .2-.49 for infrastructure on every subnet.
-1. Buy a gateway and switch that support VLANs and inter-VLAN firewall rules.
-1. Document which SSIDs and switch ports will eventually map to each network.
+2. Reserve .1 for the gateway and .2-.49 for infrastructure on every subnet.
+3. Buy a gateway and switch that support VLANs and inter-VLAN firewall rules.
+4. Document which SSIDs and switch ports will eventually map to each network.
 
 ## Anti-Patterns
 

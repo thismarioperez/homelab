@@ -350,9 +350,9 @@ metadata:
   namespace: production
 spec:
   containers:
-  - name: netshoot
-    image: nicolaka/netshoot:latest
-    command: ["/bin/sleep", "3600"]
+    - name: netshoot
+      image: nicolaka/netshoot:latest
+      command: ["/bin/sleep", "3600"]
   restartPolicy: Never
 ```
 
@@ -366,19 +366,19 @@ metadata:
   namespace: production
 spec:
   containers:
-  - name: postgres
-    image: postgres:15-alpine
-    command: ["/bin/sleep", "3600"]
-    env:
-    - name: PGHOST
-      value: postgres-service
-    - name: PGUSER
-      value: myapp
-    - name: PGPASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: postgres-secrets
-          key: password
+    - name: postgres
+      image: postgres:15-alpine
+      command: ["/bin/sleep", "3600"]
+      env:
+        - name: PGHOST
+          value: postgres-service
+        - name: PGUSER
+          value: myapp
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: password
   restartPolicy: Never
 ```
 
@@ -407,10 +407,10 @@ spec:
 ## Best Practices
 
 1. **Logs**: Always check logs first with `kubectl logs`
-1. **Events**: Use `kubectl describe` to see events
-1. **Labels**: Use consistent labels for easier debugging
-1. **Resources**: Set appropriate requests and limits
-1. **Health Checks**: Implement proper liveness and readiness probes
-1. **Monitoring**: Set up comprehensive monitoring and alerting
-1. **Debug Tools**: Keep debug containers ready
-1. **Documentation**: Document common issues and solutions
+2. **Events**: Use `kubectl describe` to see events
+3. **Labels**: Use consistent labels for easier debugging
+4. **Resources**: Set appropriate requests and limits
+5. **Health Checks**: Implement proper liveness and readiness probes
+6. **Monitoring**: Set up comprehensive monitoring and alerting
+7. **Debug Tools**: Keep debug containers ready
+8. **Documentation**: Document common issues and solutions

@@ -78,7 +78,7 @@ replicaCount: 3
 image:
   repository: myregistry.io/myapp
   pullPolicy: IfNotPresent
-  tag: ""  # Overrides the image tag (default is .Chart.AppVersion)
+  tag: "" # Overrides the image tag (default is .Chart.AppVersion)
 
 imagePullSecrets:
   - name: registry-credentials
@@ -106,7 +106,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
 
 service:
@@ -197,7 +197,7 @@ postgresql:
   enabled: true
   auth:
     username: myapp
-    password: ""  # Set via --set or separate secret
+    password: "" # Set via --set or separate secret
     database: myapp
   primary:
     persistence:
@@ -746,7 +746,7 @@ name: Release Charts
 on:
   push:
     branches: [main]
-    paths: ['charts/**']
+    paths: ["charts/**"]
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -896,17 +896,17 @@ dependencies:
 ## Best Practices
 
 1. **Versioning**: Follow semantic versioning for charts
-1. **Values**: Provide sensible defaults, allow overrides
-1. **Documentation**: Document all values in README
-1. **Testing**: Include tests in templates/tests/
-1. **Helpers**: Use \_helpers.tpl for reusable templates
-1. **Labels**: Include standard Kubernetes labels
-1. **Annotations**: Use annotations for metadata and tools
-1. **Hooks**: Use hooks for migrations, cleanup
-1. **Dependencies**: Pin dependency versions
-1. **Schema**: Validate values with values.schema.json
-1. **Use ct** for comprehensive chart testing in CI
-1. **Use helm-diff** before production upgrades
-1. **Encrypt secrets** with helm-secrets or sealed-secrets
-1. **Use library charts** for shared patterns
-1. **Push to OCI registries** for better artifact management
+2. **Values**: Provide sensible defaults, allow overrides
+3. **Documentation**: Document all values in README
+4. **Testing**: Include tests in templates/tests/
+5. **Helpers**: Use \_helpers.tpl for reusable templates
+6. **Labels**: Include standard Kubernetes labels
+7. **Annotations**: Use annotations for metadata and tools
+8. **Hooks**: Use hooks for migrations, cleanup
+9. **Dependencies**: Pin dependency versions
+10. **Schema**: Validate values with values.schema.json
+11. **Use ct** for comprehensive chart testing in CI
+12. **Use helm-diff** before production upgrades
+13. **Encrypt secrets** with helm-secrets or sealed-secrets
+14. **Use library charts** for shared patterns
+15. **Push to OCI registries** for better artifact management

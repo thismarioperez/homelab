@@ -1,6 +1,9 @@
-______________________________________________________________________
-
-## name: homelab-network-readiness description: Readiness checklist for homelab VLAN segmentation, local DNS filtering, and WireGuard-style remote access before changing router, firewall, DHCP, or VPN configuration. metadata: origin: community
+---
+name: homelab-network-readiness
+description: Readiness checklist for homelab VLAN segmentation, local DNS filtering, and WireGuard-style remote access before changing router, firewall, DHCP, or VPN configuration.
+metadata:
+  origin: community
+---
 
 # Homelab Network Readiness
 
@@ -69,10 +72,10 @@ Start with intent rather than vendor syntax.
 Before recommending VLAN IDs or subnets, confirm:
 
 1. The gateway supports inter-VLAN routing and firewall rules.
-1. The switch supports the required tagged and untagged port behavior.
-1. The APs can map SSIDs to VLANs.
-1. The operator knows which port they are connected through during the change.
-1. The management network remains reachable after trunk and SSID changes.
+2. The switch supports the required tagged and untagged port behavior.
+3. The APs can map SSIDs to VLANs.
+4. The operator knows which port they are connected through during the change.
+5. The management network remains reachable after trunk and SSID changes.
 
 ## DNS Filtering Readiness
 
@@ -80,11 +83,11 @@ Pi-hole or another local resolver should be introduced as a dependency, not as a
 single point of failure.
 
 1. Give the resolver a reserved address before using it in DHCP options.
-1. Confirm it can resolve public DNS and local `home.arpa` names.
-1. Keep the gateway or a second resolver available as a temporary fallback.
-1. Test one client or one VLAN before changing every DHCP scope.
-1. Document which networks may bypass filtering and why.
-1. Check that blocking rules do not break captive portals, work VPNs, firmware
+2. Confirm it can resolve public DNS and local `home.arpa` names.
+3. Keep the gateway or a second resolver available as a temporary fallback.
+4. Test one client or one VLAN before changing every DHCP scope.
+5. Document which networks may bypass filtering and why.
+6. Check that blocking rules do not break captive portals, work VPNs, firmware
    updates, or medical/security devices.
 
 Useful validation evidence:
@@ -124,16 +127,16 @@ Prefer small, reversible changes:
 
 1. Snapshot the current topology, IP plan, DHCP settings, DNS settings, and
    firewall rules.
-1. Reserve infrastructure addresses for gateway, DNS, controller, APs, NAS, and
+2. Reserve infrastructure addresses for gateway, DNS, controller, APs, NAS, and
    VPN endpoint.
-1. Create the new zone or VLAN without moving critical devices.
-1. Move one test client and validate DHCP, DNS, routing, internet, and block
+3. Create the new zone or VLAN without moving critical devices.
+4. Move one test client and validate DHCP, DNS, routing, internet, and block
    behavior.
-1. Add narrow firewall exceptions for required flows.
-1. Move one low-risk device group.
-1. Add VPN access with the narrowest route and firewall policy that satisfies
+5. Add narrow firewall exceptions for required flows.
+6. Move one low-risk device group.
+7. Add VPN access with the narrowest route and firewall policy that satisfies
    the use case.
-1. Document final state, known exceptions, and rollback commands or UI steps.
+8. Document final state, known exceptions, and rollback commands or UI steps.
 
 ## Review Checklist
 

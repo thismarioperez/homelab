@@ -1,6 +1,6 @@
 # Service Mesh
 
-______________________________________________________________________
+---
 
 ## Istio Installation
 
@@ -53,8 +53,8 @@ spec:
     - myapp
     - myapp.example.com
   gateways:
-    - mesh                    # Internal mesh traffic
-    - myapp-gateway           # External gateway
+    - mesh # Internal mesh traffic
+    - myapp-gateway # External gateway
   http:
     # Route based on headers
     - match:
@@ -209,7 +209,7 @@ spec:
     matchLabels:
       app: legacy-service
   mtls:
-    mode: PERMISSIVE  # Allow both mTLS and plaintext
+    mode: PERMISSIVE # Allow both mTLS and plaintext
 ---
 # Mesh-wide mTLS policy
 apiVersion: security.istio.io/v1beta1
@@ -388,9 +388,9 @@ spec:
   service: myapp
   backends:
     - service: myapp-v1
-      weight: 900m    # 90%
+      weight: 900m # 90%
     - service: myapp-v2
-      weight: 100m    # 10%
+      weight: 100m # 10%
 ```
 
 ## Multi-Cluster Mesh (Istio)
@@ -448,12 +448,12 @@ istioctl dashboard jaeger
 ## Best Practices
 
 1. **Start with permissive mTLS**, migrate to strict gradually
-1. **Use circuit breakers** to prevent cascade failures
-1. **Set reasonable timeouts** and retry budgets
-1. **Enable distributed tracing** for observability
-1. **Test with fault injection** before production
-1. **Monitor sidecar resource usage** and tune accordingly
-1. **Use traffic mirroring** to validate new versions safely
-1. **Implement authorization policies** for zero-trust
-1. **Keep service mesh version updated** for security patches
-1. **Document traffic routing decisions** in VirtualServices
+2. **Use circuit breakers** to prevent cascade failures
+3. **Set reasonable timeouts** and retry budgets
+4. **Enable distributed tracing** for observability
+5. **Test with fault injection** before production
+6. **Monitor sidecar resource usage** and tune accordingly
+7. **Use traffic mirroring** to validate new versions safely
+8. **Implement authorization policies** for zero-trust
+9. **Keep service mesh version updated** for security patches
+10. **Document traffic routing decisions** in VirtualServices
