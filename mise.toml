@@ -16,8 +16,8 @@ python = "3"
 pipx = "latest"
 "pipx:ansible" = { version = "14", pipx_args = "--include-deps" }
 "pipx:ansible-lint" = "26"
-"pipx:pre-commit" = "latest"
 "npm:prettier" = "latest"
+"aqua:pre-commit/pre-commit" = "latest"
 k9s = "latest"
 
 [tasks."op:whoami"]
