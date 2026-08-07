@@ -47,39 +47,34 @@ mise run talos:testlab:talosconfig
 export TALOSCONFIG=tofu/testlab/.cache/talosconfig
 ```
 
-### 3. Bootstrap the ESO secret
-
-External Secrets Operator can't resolve any `ExternalSecret` — including
-its own `ClusterSecretStore` — until its 1Password service account token
-exists in-cluster. This is the one secret that has to be created
-out-of-band before anything else can manage secrets for itself:
+### 3. Bootstrap the cluster and Flux
 
 ```bash
 mise run kubernetes:testlab:bootstrap
 ```
 
-Requires the `1Password Service Account Auth Token: testlab k8s eso` item in the
-`Home Network` 1Password vault (see
-[`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/external-secrets/app/cluster-secret-store.yaml)).
+Runs, in order:
 
-### 4. Bootstrap Flux
+1. Creates ESO's own 1Password service account token Secret — a
+   chicken-and-egg bootstrap, since ESO isn't running yet to manage this
+   secret itself, and can't resolve any `ExternalSecret` (including its own
+   `ClusterSecretStore`) without it. Requires the
+   `1Password Service Account Auth Token: testlab k8s eso` item to already
+   exist in the `Home Network` 1Password vault (see
+   [`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/cluster-secret-store/cluster-secret-store.yaml)).
+1. Applies MetalLB's reserved LB IP, from tofu output, as the
+   `metallb-config` ConfigMap Flux substitutes into `IPAddressPool`.
+1. Runs a one-time `helmfile sync` against
+   [`bootstrap/flux/helmfile.yaml`](../kubernetes/testlab/bootstrap/flux/helmfile.yaml),
+   installing `flux-operator` and a `FluxInstance` (via the `flux-instance`
+   chart).
 
-```bash
-mise run kubernetes:testlab:bootstrap-flux
-```
-
-Runs, in order: `bootstrap` (the ESO secret, step 3, if not already done) →
-`render-metallb-config` (applies MetalLB's reserved LB IP, from tofu output,
-as the `metallb-config` ConfigMap Flux substitutes into `IPAddressPool`) →
-a one-time `helmfile sync` against
-[`bootstrap/flux/helmfile.yaml`](../kubernetes/testlab/bootstrap/flux/helmfile.yaml),
-installing `flux-operator` and a `FluxInstance` (via the `flux-instance`
-chart). From this point on, Flux owns reconciliation: it watches this
-repo's `main` branch at `kubernetes/testlab/apps/` and applies every
-`Kustomization`/`HelmRelease` it finds there — including its own
-`flux-instance`, so future upgrades to Flux itself also flow through git
-instead of a manual `helmfile sync`. This bootstrap step is never re-run
-except to recover a cluster where Flux itself is broken.
+From this point on, Flux owns reconciliation: it watches this repo's `main`
+branch at `kubernetes/testlab` and applies every `Kustomization`/
+`HelmRelease` it finds there — including its own `flux-instance`, so future
+upgrades to Flux itself also flow through git instead of a manual
+`helmfile sync`. This bootstrap step is never re-run except to recover a
+cluster where Flux itself is broken.
 
 Talos ships no Traefik, no `local-path-provisioner`, and no default
 CNI-agnostic Gateway API implementation the way k3s did — Flux installs
@@ -88,7 +83,7 @@ CNI-agnostic Gateway API implementation the way k3s did — Flux installs
 built-ins. Talos deploys its default Flannel CNI automatically; this repo
 doesn't override that choice for `testlab`.
 
-### 5. Verify
+### 4. Verify
 
 ```bash
 mise run kubernetes:testlab:validate    # schema-validates rendered output
@@ -100,7 +95,7 @@ kubectl get storageclass                    # local-path should show (default)
 ```
 
 Once verified, any further change is just a git commit to
-`kubernetes/testlab/apps/` on `main` — Flux picks it up on its next
+`kubernetes/testlab/` on `main` — Flux picks it up on its next
 `sync.interval` (5m), no manual apply step needed.
 
 ## Resource distribution

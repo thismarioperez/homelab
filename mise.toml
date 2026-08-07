@@ -92,19 +92,26 @@ depends = ["talos:testlab:kubeconfig"]
 env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = "k9s"
 
-[tasks."kubernetes:testlab:render-metallb-config"]
-description = "apply the MetalLB LB IP (from tofu/testlab's k8s_lb_ip output) as the metallb-config ConfigMap Flux substitutes into IPAddressPool — safe to re-run any time the reserved IP changes"
-dir = "{{config_root}}/tofu/testlab"
-depends = ["talos:testlab:kubeconfig"]
-env = { _.file = "{{config_root}}/tofu/testlab/.env", KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
-run = "kubectl create configmap metallb-config --from-literal=LB_IP=\"$(tofu output -raw k8s_lb_ip)/32\" -n metallb-system --dry-run=client -o yaml | kubectl apply -f -"
-
-[tasks."kubernetes:testlab:bootstrap-flux"]
-description = "one-time bootstrap of Flux itself (flux-operator + flux-instance via helmfile) — Flux takes over reconciling everything else in apps/ from here on; must run after bootstrap (ESO secret)"
+[tasks."kubernetes:testlab:bootstrap"]
+description = "one-time bootstrap of the testlab cluster: ESO's 1Password service account secret, the MetalLB reserved-IP ConfigMap, then flux-operator + flux-instance via helmfile — Flux takes over reconciling everything else in apps/ from here on"
 dir = "{{config_root}}/kubernetes/testlab/bootstrap/flux"
-depends = ["kubernetes:testlab:bootstrap", "kubernetes:testlab:render-metallb-config"]
+depends = ["talos:testlab:kubeconfig"]
 env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
-run = "helmfile sync"
+run = [
+  # ESO's own 1Password service account token — chicken-and-egg, since ESO
+  # isn't running yet to manage this secret itself.
+  "kubectl create namespace security-system --dry-run=client -o yaml | kubectl apply -f -",
+  "kubectl create secret generic onepassword-service-account-token --from-literal=token=\"$(op item get '1Password Service Account Auth Token: testlab k8s eso' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
+
+  # MetalLB's reserved LB IP, as the ConfigMap Flux substitutes into
+  # IPAddressPool — safe to re-run any time the reserved IP changes.
+  "kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -",
+  "kubectl create configmap metallb-config --from-literal=LB_IP=\"$(tofu -chdir={{config_root}}/tofu/testlab output -raw k8s_lb_ip)/32\" -n metallb-system --dry-run=client -o yaml | kubectl apply -f -",
+
+  # Installs flux-operator and a FluxInstance — Flux owns reconciliation of
+  # everything else in kubernetes/testlab/ from here on.
+  "helmfile sync",
+]
 
 [tasks."kubernetes:testlab:flux-status"]
 description = "show the reconciliation status of every Flux Kustomization/HelmRelease in the testlab cluster"
@@ -112,15 +119,6 @@ env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = [
   "flux get kustomizations -A",
   "flux get helmreleases -A",
-]
-
-[tasks."kubernetes:testlab:bootstrap"]
-description = "one-time bootstrap of secrets that can't be managed in-cluster yet — currently ESO's own 1Password service account token into the security-system namespace (chicken-and-egg: ESO isn't running yet to manage this itself)"
-depends = ["talos:testlab:kubeconfig"]
-env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
-run = [
-  "kubectl create namespace security-system --dry-run=client -o yaml | kubectl apply -f -",
-  "kubectl create secret generic onepassword-service-account-token --from-literal=token=\"$(op item get '1Password Service Account Auth Token: testlab k8s eso' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
 ]
 
 [tasks."kubernetes:yamllint"]
