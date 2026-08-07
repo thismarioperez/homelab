@@ -1,0 +1,30 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: traefik
+      version: 34.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+
+  values:
+    # Mirrors the values k3s's bundled Traefik previously got via the
+    # k3s-only HelmChartConfig CRD (see ../../gateway, which depends on
+    # this GatewayClass existing).
+    providers:
+      kubernetesGateway:
+        enabled: true
+
+    # We hand-author our own Gateway (../../gateway) rather than use the
+    # chart's opinionated default one, so it stays disabled here;
+    # gatewayClass stays on so Traefik still owns its GatewayClass.
+    gateway:
+      enabled: false
+    gatewayClass:
+      enabled: true

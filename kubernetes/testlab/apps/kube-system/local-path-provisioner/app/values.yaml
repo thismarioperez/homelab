@@ -1,4 +1,0 @@
-# Replaces k3s's bundled local-path-provisioner as the default
-# general-purpose StorageClass (Talos ships no default StorageClass).
-storageClass:
-  defaultClass: true

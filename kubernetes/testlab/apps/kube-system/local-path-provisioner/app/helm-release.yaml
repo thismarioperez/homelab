@@ -1,0 +1,20 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: local-path-provisioner
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: local-path-provisioner
+      version: 0.0.31
+      sourceRef:
+        kind: HelmRepository
+        name: local-path-provisioner
+
+  values:
+    # Replaces k3s's bundled local-path-provisioner as the default
+    # general-purpose StorageClass (Talos ships no default StorageClass).
+    storageClass:
+      defaultClass: true

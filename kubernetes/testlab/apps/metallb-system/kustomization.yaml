@@ -1,29 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: metallb-system
-
 resources:
   - namespace.yaml
-  - ipaddresspool.yaml
-
-# lb.env is gitignored and generated locally by
-# `mise run kubernetes:testlab:render-metallb-config` (reads tofu/testlab's
-# k3s_lb_ip output) — run that once, or whenever the reserved IP changes,
-# before applying/diffing/validating kubernetes/testlab.
-configMapGenerator:
-  - name: metallb-lb-ip
-    envs:
-      - lb.env
-
-replacements:
-  - source:
-      kind: ConfigMap
-      name: metallb-lb-ip
-      fieldPath: data.LB_IP
-    targets:
-      - select:
-          kind: IPAddressPool
-          name: k3s-lb
-        fieldPaths:
-          - spec.addresses.0
+  - metallb/app.ks.yaml
+  - config.ks.yaml

@@ -16,4 +16,3 @@ tofu/testlab/.cache/
 .claude/__*
 
 kubernetes/**/charts/
-kubernetes/testlab/apps/metallb-system/lb.env

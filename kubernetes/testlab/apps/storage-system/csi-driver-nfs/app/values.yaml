@@ -1,8 +1,0 @@
-storageClass:
-  create: true
-  name: nfs-backups
-  parameters:
-    server: 10.30.10.4
-    share: /volume1/kubernetes/testlab/backups
-  reclaimPolicy: Retain
-  volumeBindingMode: Immediate

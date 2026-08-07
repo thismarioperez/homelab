@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: local-path-provisioner
+spec:
+  interval: 10m
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: kube-system
+
+  path: ./kubernetes/testlab/apps/kube-system/local-path-provisioner/app
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system

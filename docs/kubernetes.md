@@ -60,26 +60,31 @@ mise run kubernetes:testlab:bootstrap
 
 Requires the `1Password Service Account Auth Token: testlab k8s eso` item in the
 `Home Network` 1Password vault (see
-[`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/external-secrets/cluster-secret-store.yaml)).
+[`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/external-secrets/app/cluster-secret-store.yaml)).
 
-### 4. Apply the full stack
+### 4. Bootstrap Flux
 
 ```bash
-mise run kubernetes:testlab:apply
+mise run kubernetes:testlab:bootstrap-flux
 ```
 
-Runs, in order: `render-metallb-config` (writes MetalLB's reserved LB IP
-from tofu output) → `apply-volumesnapshot-crds` (applies the
-`snapshot.storage.k8s.io` CRDs VolSync's controller requires at startup) →
-`apply-crds` (pre-applies CRDs bundled by charts, via
-[`bootstrap/crds/`](../kubernetes/testlab/bootstrap/crds/README.md)) →
-`apply-charts` (`helmfile sync`) → `apply-manifests`
-(`kubectl apply -k testlab`).
+Runs, in order: `bootstrap` (the ESO secret, step 3, if not already done) →
+`render-metallb-config` (applies MetalLB's reserved LB IP, from tofu output,
+as the `metallb-config` ConfigMap Flux substitutes into `IPAddressPool`) →
+a one-time `helmfile sync` against
+[`bootstrap/flux/helmfile.yaml`](../kubernetes/testlab/bootstrap/flux/helmfile.yaml),
+installing `flux-operator` and a `FluxInstance` (via the `flux-instance`
+chart). From this point on, Flux owns reconciliation: it watches this
+repo's `main` branch at `kubernetes/testlab/apps/` and applies every
+`Kustomization`/`HelmRelease` it finds there — including its own
+`flux-instance`, so future upgrades to Flux itself also flow through git
+instead of a manual `helmfile sync`. This bootstrap step is never re-run
+except to recover a cluster where Flux itself is broken.
 
 Talos ships no Traefik, no `local-path-provisioner`, and no default
-CNI-agnostic Gateway API implementation the way k3s did — `apply-charts` now
-installs `traefik` and `local-path-provisioner` as first-class releases
-(see `kubernetes/testlab/helmfile.yaml`) to replace those former k3s
+CNI-agnostic Gateway API implementation the way k3s did — Flux installs
+`traefik` and `local-path-provisioner` as first-class `HelmRelease`s (see
+`kubernetes/testlab/apps/kube-system/`) to replace those former k3s
 built-ins. Talos deploys its default Flannel CNI automatically; this repo
 doesn't override that choice for `testlab`.
 
@@ -87,11 +92,16 @@ doesn't override that choice for `testlab`.
 
 ```bash
 mise run kubernetes:testlab:validate    # schema-validates rendered output
+mise run kubernetes:testlab:flux-status # shows Flux Kustomization/HelmRelease reconciliation status
 kubectl get pods -A
 kubectl get clustersecretstore onepassword   # should show Valid
 kubectl get gatewayclass traefik            # should show ACCEPTED
 kubectl get storageclass                    # local-path should show (default)
 ```
+
+Once verified, any further change is just a git commit to
+`kubernetes/testlab/apps/` on `main` — Flux picks it up on its next
+`sync.interval` (5m), no manual apply step needed.
 
 ## Resource distribution
 
