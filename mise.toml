@@ -114,6 +114,14 @@ run = [
   "flux get helmreleases -A",
 ]
 
+[tasks."kubernetes:testlab:flux-sync"]
+description = "force Flux to pull the latest git commit and reconcile every Kustomization in the testlab cluster now, instead of waiting for the next scheduled interval"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = [
+  "flux reconcile source git flux-system",
+  "flux reconcile kustomization flux-system --with-source",
+]
+
 [tasks."kubernetes:testlab:validate"]
 description = "validate rendered testlab kustomize output (Flux Kustomization/HelmRelease/HelmRepository/OCIRepository CRs — Flux's helm-controller inflates the actual chart output in-cluster, not here) against the k8s schema"
 dir = "{{config_root}}/kubernetes/testlab"
