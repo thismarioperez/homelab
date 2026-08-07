@@ -11,3 +11,7 @@ spec:
     copyMethod: "${VOLSYNC_COPYMETHOD:=Direct}"
     address: "volsync-rsync-tls-dst-${APP}-dst.${VOLSYNC_NAMESPACE}.svc.cluster.local"
     keySecret: "volsync-rsync-tls-${APP}-dst"
+    moverSecurityContext:
+      runAsUser: ${VOLSYNC_PUID:=1000}
+      runAsGroup: ${VOLSYNC_PGID:=1000}
+      fsGroup: ${VOLSYNC_PGID:=1000}
