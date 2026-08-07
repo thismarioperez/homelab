@@ -21,9 +21,9 @@ spec:
   postBuild:
     substitute:
       APP: pihole
-      VOLSYNC_NAMESPACE: default
       VOLSYNC_PVC: pihole-config
       VOLSYNC_CAPACITY: 4Gi
+      VOLSYNC_B2_REGION: us-west-002
       # pihole's data dir mixes ownership: most files are pihole:pihole
       # (568:568), but a few (e.g. /etc/pihole/logrotate) are root:root
       # mode 0640, written before the container drops privileges. No
@@ -36,3 +36,7 @@ spec:
       namespace: kube-system
     - name: volsync
       namespace: storage-system
+    - name: longhorn-snapshot-class
+      namespace: storage-system
+    - name: external-secrets
+      namespace: security-system

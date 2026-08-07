@@ -6,4 +6,7 @@ namespace: storage-system
 resources:
   - namespace.yaml
   - csi-driver-nfs/app.ks.yaml
+  - snapshot-controller/app.ks.yaml
+  - longhorn/app.ks.yaml
+  - longhorn/snapshot-class.ks.yaml
   - volsync/app.ks.yaml

@@ -129,11 +129,19 @@ resource "opnsense_kea_dhcpv4_reservation" "talos_apiserver_vip" {
 # extension baked in — this is what lets Proxmox report VM status and IP in
 # the UI. The talos provider resources below don't depend on it: they key off
 # the statically-assigned IPs directly rather than waiting on the guest agent.
+#
+# iscsi-tools + util-linux-tools are required by Longhorn (iscsid/iscsiadm
+# and kernel module tooling aren't in the Talos base image) — see
+# https://longhorn.io/docs/1.12.0/advanced-resources/os-distro-specific/talos-linux-support/
 resource "talos_image_factory_schematic" "this" {
   schematic = yamlencode({
     customization = {
       systemExtensions = {
-        officialExtensions = ["siderolabs/qemu-guest-agent"]
+        officialExtensions = [
+          "siderolabs/qemu-guest-agent",
+          "siderolabs/iscsi-tools",
+          "siderolabs/util-linux-tools",
+        ]
       }
     }
   })

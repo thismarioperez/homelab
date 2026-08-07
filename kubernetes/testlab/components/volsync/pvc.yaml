@@ -6,7 +6,7 @@ metadata:
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
-  storageClassName: "${VOLSYNC_STORAGECLASS:=nfs-backups}"
+  storageClassName: "${VOLSYNC_STORAGECLASS:=longhorn}"
   accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
   resources:
     requests:

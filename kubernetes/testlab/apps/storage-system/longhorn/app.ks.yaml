@@ -1,0 +1,21 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: longhorn
+spec:
+  interval: 10m
+  prune: true
+  wait: true
+  timeout: 10m
+  targetNamespace: storage-system
+
+  path: ./kubernetes/testlab/apps/storage-system/longhorn/app
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+
+  dependsOn:
+    - name: snapshot-controller
+      namespace: storage-system

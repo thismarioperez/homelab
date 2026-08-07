@@ -7,10 +7,19 @@ spec:
   sourcePVC: "${VOLSYNC_PVC:=${APP}}"
   trigger:
     schedule: "${VOLSYNC_SCHEDULE:=0 4 * * *}" # 4AM daily
-  rsyncTLS:
-    copyMethod: "${VOLSYNC_COPYMETHOD:=Direct}"
-    address: "volsync-rsync-tls-dst-${APP}-dst.${VOLSYNC_NAMESPACE}.svc.cluster.local"
-    keySecret: "volsync-rsync-tls-${APP}-dst"
+  restic:
+    # Snapshot (not Direct): takes a Longhorn VolumeSnapshot of the source
+    # PVC first and runs restic against that, so a live-written file (e.g.
+    # a DB) can't be read mid-write — see longhorn/snapshot-class.
+    copyMethod: Snapshot
+    volumeSnapshotClassName: longhorn
+    repository: "${APP}-restic-b2"
+    retain:
+      hourly: "${VOLSYNC_RETAIN_HOURLY:=0}"
+      daily: "${VOLSYNC_RETAIN_DAILY:=7}"
+      weekly: "${VOLSYNC_RETAIN_WEEKLY:=4}"
+      monthly: "${VOLSYNC_RETAIN_MONTHLY:=3}"
+    pruneIntervalDays: "${VOLSYNC_PRUNE_INTERVAL_DAYS:=7}"
     moverSecurityContext:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
