@@ -51,9 +51,9 @@ data "talos_machine_configuration" "worker" {
 resource "talos_machine_configuration_apply" "controller" {
   count = length(var.k8s_controller_ips)
 
-  # node/endpoint use the DHCP-reserved IP directly rather than the module's
-  # ip_address output, so there's no attribute reference tying this resource
-  # to module.k8s_vm_controller — without this depends_on, tofu has no
+  # node/endpoint use the statically-assigned IP directly, so there's no
+  # attribute reference tying this resource to
+  # module.k8s_vm_controller — without this depends_on, tofu has no
   # ordering constraint and will race ahead trying to reach a VM that
   # doesn't exist yet, retrying until it times out.
   depends_on = [module.k8s_vm_controller]

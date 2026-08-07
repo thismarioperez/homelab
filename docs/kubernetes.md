@@ -160,8 +160,8 @@ after the first sizing pass came in over budget.
 
 ### Per-role VM sizing
 
-Defined in `tofu/testlab/variables.tf`, applied via the `k3s_vm_controller`
-and `k3s_vm_worker` module blocks in `tofu/testlab/main.tf`.
+Defined in `tofu/testlab/variables.tf`, applied via the `k8s_vm_controller`
+and `k8s_vm_worker` module blocks in `tofu/testlab/main.tf`.
 
 | Role       | Count | Cores each | Memory each      | Disk each | Memory total | Disk total |
 | ---------- | ----- | ---------- | ---------------- | --------- | ------------ | ---------- |
@@ -176,9 +176,9 @@ where Traefik, MetalLB's speaker, and test workloads actually run.
 
 ### Persistent storage
 
-`local-path-provisioner` (a `helmfile.yaml` release, replacing what k3s
-used to bundle by default) is the default StorageClass for general-purpose
-PVCs, backed by the worker's local disk.
+`local-path-provisioner` (a Flux `HelmRelease`, replacing what k3s used to
+bundle by default) is the default StorageClass for general-purpose PVCs,
+backed by the worker's local disk.
 
 A separate `nfs.csi.k8s.io` StorageClass (`nfs-backups`, non-default,
 `kubernetes/testlab/apps/storage-system/csi-driver-nfs`) is reserved for

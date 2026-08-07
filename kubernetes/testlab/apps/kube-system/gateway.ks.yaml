@@ -18,3 +18,4 @@ spec:
 
   dependsOn:
     - name: traefik
+      namespace: kube-system

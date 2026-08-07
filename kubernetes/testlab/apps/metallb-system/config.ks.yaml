@@ -18,8 +18,13 @@ spec:
 
   postBuild:
     substituteFrom:
+      # Created by `mise run kubernetes:testlab:render-metallb-config` into
+      # this same namespace. optional: false so a missing ConfigMap fails the
+      # reconcile loudly instead of rendering a literal ${LB_IP}.
       - kind: ConfigMap
         name: metallb-config
+        optional: false
 
   dependsOn:
     - name: metallb
+      namespace: metallb-system

@@ -126,10 +126,9 @@ resource "opnsense_kea_dhcpv4_reservation" "talos_apiserver_vip" {
 }
 
 # Requests a Talos Image Factory schematic with the qemu-guest-agent system
-# extension baked in — required for Proxmox to detect the VM's IP address
-# after boot (see talos-vm module's ip_address output) and for the talos
-# provider resources below, which key off that reserved IP directly rather
-# than waiting on the guest agent.
+# extension baked in — this is what lets Proxmox report VM status and IP in
+# the UI. The talos provider resources below don't depend on it: they key off
+# the statically-assigned IPs directly rather than waiting on the guest agent.
 resource "talos_image_factory_schematic" "this" {
   schematic = yamlencode({
     customization = {
