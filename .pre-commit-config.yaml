@@ -16,23 +16,16 @@ repos:
         files: ^tofu/.*\.tf$
         pass_filenames: false
 
-      - id: kubernetes-yamllint
-        name: kubernetes yamllint
-        entry: mise run kubernetes:yamllint
-        language: system
-        files: ^kubernetes/
-        pass_filenames: false
-
       - id: ansible-check
-        name: ansible check (yamllint + ansible-lint)
+        name: ansible check (ansible-lint)
         entry: mise run ansible:check
         language: system
         files: ^ansible/
         pass_filenames: false
 
-      - id: markdown-fmt-check
-        name: markdown fmt-check
-        entry: mise run markdown:fmt-check
+      - id: prettier-check
+        name: prettier check
+        entry: mise run format:prettier-check
         language: system
-        files: \.md$
+        files: \.(ya?ml|md|json)$
         pass_filenames: false

@@ -16,9 +16,8 @@ python = "3"
 pipx = "latest"
 "pipx:ansible" = { version = "14", pipx_args = "--include-deps" }
 "pipx:ansible-lint" = "26"
-"pipx:yamllint" = "latest"
-"pipx:mdformat" = { version = "1.0.0", pipx_args = "--preinstall mdformat-gfm==1.0.0" }
 "pipx:pre-commit" = "latest"
+"npm:prettier" = "latest"
 k9s = "latest"
 
 [tasks."op:whoami"]
@@ -47,15 +46,9 @@ description = "lint ansible playbooks and roles with ansible-lint"
 dir = "{{config_root}}/ansible"
 run = "ansible-lint"
 
-[tasks."ansible:yamllint"]
-description = "check ansible yaml formatting with yamllint"
-dir = "{{config_root}}/ansible"
-run = "yamllint ."
-
 [tasks."ansible:check"]
 description = "check formatting and validity of ansible playbooks and roles"
 depends = [
-  "ansible:yamllint",
   "ansible:lint",
 ]
 
@@ -121,11 +114,6 @@ run = [
   "flux get helmreleases -A",
 ]
 
-[tasks."kubernetes:yamllint"]
-description = "check kubernetes yaml formatting with yamllint"
-dir = "{{config_root}}/kubernetes"
-run = "yamllint ."
-
 [tasks."kubernetes:testlab:validate"]
 description = "validate rendered testlab kustomize output (Flux Kustomization/HelmRelease/HelmRepository/OCIRepository CRs — Flux's helm-controller inflates the actual chart output in-cluster, not here) against the k8s schema"
 dir = "{{config_root}}/kubernetes/testlab"
@@ -134,7 +122,6 @@ run = "kubectl kustomize . | kubeconform -strict -ignore-missing-schemas -kubern
 [tasks."kubernetes:check"]
 description = "check formatting and validity of kubernetes manifests"
 depends = [
-  "kubernetes:yamllint",
   "kubernetes:testlab:validate",
 ]
 
@@ -229,10 +216,10 @@ depends = [
   "tofu:testlab:check",
 ]
 
-[tasks."markdown:fmt"]
-description = "format all markdown files with mdformat"
-run = "mdformat --exclude '**/.terraform/**' --exclude '**/charts/**' --exclude '**/.claude/**' ."
+[tasks."format:prettier"]
+description = "format all yaml, markdown, and json files with prettier"
+run = "prettier --write ."
 
-[tasks."markdown:fmt-check"]
-description = "check markdown formatting without modifying files"
-run = "mdformat --exclude '**/.terraform/**' --exclude '**/charts/**' --exclude '**/.claude/**' --check ."
+[tasks."format:prettier-check"]
+description = "check yaml, markdown, and json formatting without modifying files"
+run = "prettier --check ."

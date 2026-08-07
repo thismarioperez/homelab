@@ -8,3 +8,4 @@
 # false positive for non-vendored collections).
 exclude_paths:
   - playbooks/k3s_install.yml
+  - .cache/

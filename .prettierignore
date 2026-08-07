@@ -1,0 +1,6 @@
+*.sops.yaml
+kubernetes/**/charts/
+.terraform/
+tofu/testlab/.cache/
+ansible/.cache/
+.claude/
