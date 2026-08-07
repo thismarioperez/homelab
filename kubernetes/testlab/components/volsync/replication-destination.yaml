@@ -8,6 +8,7 @@ spec:
     schedule: "${VOLSYNC_SCHEDULE:=0 4 * * *}" # 4AM daily
   rsyncTLS:
     copyMethod: "${VOLSYNC_COPYMETHOD:=Direct}"
+    destinationPVC: "${VOLSYNC_PVC:=${APP}}"
     storageClassName: "${VOLSYNC_STORAGECLASS:=nfs-backups}"
     accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
     capacity: "${VOLSYNC_CAPACITY:=5Gi}"

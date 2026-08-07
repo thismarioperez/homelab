@@ -17,6 +17,6 @@ spec:
   values:
     persistence:
       config:
-        size: 4Gi
+        existingClaim: pihole-config
       dnsmasq:
         size: 1Gi
