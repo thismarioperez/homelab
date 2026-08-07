@@ -24,8 +24,12 @@ spec:
       VOLSYNC_NAMESPACE: default
       VOLSYNC_PVC: pihole-config
       VOLSYNC_CAPACITY: 4Gi
-      VOLSYNC_PUID: "568"
-      VOLSYNC_PGID: "568"
+      # pihole's data dir mixes ownership: most files are pihole:pihole
+      # (568:568), but a few (e.g. /etc/pihole/logrotate) are root:root
+      # mode 0640, written before the container drops privileges. No
+      # single non-root UID/GID can read both, so the mover runs as root.
+      VOLSYNC_PUID: "0"
+      VOLSYNC_PGID: "0"
 
   dependsOn:
     - name: gateway

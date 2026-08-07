@@ -7,3 +7,8 @@ metadata:
     # network stack — Talos's default PodSecurity admission config enforces
     # `baseline` on namespaces with no explicit level, which forbids that.
     pod-security.kubernetes.io/enforce: privileged
+  annotations:
+    # Lets VolSync run its rsync-tls mover as root (VOLSYNC_PUID/PGID: "0")
+    # for apps like pihole whose data dir mixes ownership (most files
+    # app:app, a few root:root) in a way no single non-root UID can read.
+    volsync.backube/privileged-movers: "true"
