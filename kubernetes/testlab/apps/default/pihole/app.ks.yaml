@@ -24,6 +24,8 @@ spec:
       VOLSYNC_NAMESPACE: default
       VOLSYNC_PVC: pihole-config
       VOLSYNC_CAPACITY: 4Gi
+      VOLSYNC_PUID: "568"
+      VOLSYNC_PGID: "568"
 
   dependsOn:
     - name: gateway
