@@ -1,0 +1,14 @@
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: "${APP}-dst"
+spec:
+  trigger:
+    schedule: "${VOLSYNC_SCHEDULE:=0 4 * * *}" # 4AM daily
+  rsyncTLS:
+    copyMethod: "${VOLSYNC_COPYMETHOD:=Direct}"
+    storageClassName: "${VOLSYNC_STORAGECLASS:=nfs-backups}"
+    accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
+    capacity: "${VOLSYNC_CAPACITY:=5Gi}"
+    serviceType: ClusterIP

@@ -6,3 +6,4 @@ namespace: storage-system
 resources:
   - namespace.yaml
   - csi-driver-nfs/app.ks.yaml
+  - volsync/app.ks.yaml
