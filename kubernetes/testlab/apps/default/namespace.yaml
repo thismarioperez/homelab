@@ -2,3 +2,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: default
+  labels:
+    # pihole needs NET_ADMIN, SYS_NICE, and SYS_TIME to manage its own DNS/
+    # network stack — Talos's default PodSecurity admission config enforces
+    # `baseline` on namespaces with no explicit level, which forbids that.
+    pod-security.kubernetes.io/enforce: privileged
