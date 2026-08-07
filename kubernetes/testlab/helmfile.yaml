@@ -1,4 +1,8 @@
 repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: local-path-provisioner
+    url: https://charts.containeroo.ch
   - name: metallb
     url: https://metallb.github.io/metallb
   - name: csi-driver-nfs
@@ -11,6 +15,22 @@ repositories:
   # in releases[].chart below — no repository entry needed for OCI charts.
 
 releases:
+  # k3s bundled Traefik + local-path-provisioner as built-in add-ons; Talos
+  # runs vanilla Kubernetes, so both become real releases here instead.
+  - name: traefik
+    namespace: kube-system
+    chart: traefik/traefik
+    version: 34.0.0
+    values:
+      - apps/kube-system/traefik/app/values.yaml
+
+  - name: local-path-provisioner
+    namespace: kube-system
+    chart: local-path-provisioner/local-path-provisioner
+    version: 0.0.31
+    values:
+      - apps/kube-system/local-path-provisioner/app/values.yaml
+
   - name: metallb
     namespace: metallb-system
     chart: metallb/metallb

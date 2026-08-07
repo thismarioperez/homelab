@@ -10,6 +10,7 @@ backend.hcl
 
 .ansible/
 ansible/.cache/
+tofu/testlab/.cache/
 
 .claude/settings.local.json
 .claude/__*

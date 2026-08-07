@@ -1,20 +1,31 @@
-output "k3s_apiserver_vip" {
-  description = "IP address reserved for kube-vip to announce as the k3s control plane's floating apiserver address"
-  value       = var.k3s_apiserver_vip
+output "talos_apiserver_vip" {
+  description = "IP address reserved for Talos's native VIP mechanism to announce as the control plane's floating apiserver address"
+  value       = var.talos_apiserver_vip
 }
 
-output "k3s_lb_ip" {
-  description = "IP address reserved for MetalLB to announce as the k3s cluster's LoadBalancer address"
-  value       = var.k3s_lb_ip
+output "k8s_lb_ip" {
+  description = "IP address reserved for MetalLB to announce as the cluster's LoadBalancer address"
+  value       = var.k8s_lb_ip
+}
+
+output "talos_kubeconfig" {
+  description = "Raw kubeconfig for the testlab Talos cluster"
+  value       = talos_cluster_kubeconfig.this.kubeconfig_raw
+  sensitive   = true
+}
+
+output "talos_config" {
+  description = "Raw talosconfig (talosctl client config) for the testlab Talos cluster"
+  value       = data.talos_client_configuration.this.talos_config
+  sensitive   = true
 }
 
 output "vm_network_info" {
-  description = "MAC and IPv4 addresses of deployed VMs, keyed by VM name (ip_address is the address actually reported by the QEMU guest agent, null until it reports in; reserved_ip_address is the OPNsense DHCP reservation's intended address and should match once DHCP has run)"
+  description = "MAC and IPv4 addresses of deployed VMs, keyed by VM name. ip_address is the VM's statically-configured address (known before apply, not reported by the guest agent) — the matching Kea reservation only excludes it from the DHCP dynamic pool"
   value = {
-    for i, vm in local.k3s_vms : vm.vm_name => {
-      mac_address         = vm.mac_address
-      ip_address          = vm.ip_address
-      reserved_ip_address = local.k3s_vm_ips[i]
+    for i, vm in local.k8s_vms : vm.vm_name => {
+      mac_address = vm.mac_address
+      ip_address  = local.k8s_vm_ips[i]
     }
   }
 }

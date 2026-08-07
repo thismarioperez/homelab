@@ -22,13 +22,9 @@ terraform {
       source  = "hashicorp/http"
       version = "~> 3.4"
     }
-    ansible = {
-      source  = "ansible/ansible"
-      version = "~> 1.2"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.13"
+    talos = {
+      source  = "siderolabs/talos"
+      version = "~> 0.11.0"
     }
   }
 }

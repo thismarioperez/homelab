@@ -9,10 +9,13 @@
 #     | kubectl apply --server-side --force-conflicts -f -
 #
 # Only charts that bundle their own CRDs are listed here. The TrueCharts
-# apps (pihole, snapdrop) bundle no CRDs and are intentionally excluded.
-# Versions must be kept in sync with ../../helmfile.yaml by hand — there is
-# no automatic link between the two files.
+# apps (pihole, snapdrop) and local-path-provisioner bundle no CRDs and are
+# intentionally excluded. Versions must be kept in sync with
+# ../../helmfile.yaml by hand — there is no automatic link between the two
+# files.
 repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
   - name: metallb
     url: https://metallb.github.io/metallb
   - name: csi-driver-nfs
@@ -23,6 +26,10 @@ repositories:
     url: https://backube.github.io/helm-charts/
 
 releases:
+  - name: traefik-crds
+    namespace: kube-system
+    chart: traefik/traefik
+    version: 34.0.0
   - name: metallb-crds
     namespace: metallb-system
     chart: metallb/metallb

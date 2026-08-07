@@ -1,0 +1,14 @@
+# Mirrors the values k3s's bundled Traefik previously got via the
+# k3s-only HelmChartConfig CRD (see apps/kube-system/gateway.yaml, which
+# depends on this GatewayClass existing).
+providers:
+  kubernetesGateway:
+    enabled: true
+
+# We hand-author our own Gateway (apps/kube-system/gateway.yaml) rather than
+# use the chart's opinionated default one, so it stays disabled here;
+# gatewayClass stays on so Traefik still owns its GatewayClass.
+gateway:
+  enabled: false
+gatewayClass:
+  enabled: true

@@ -18,4 +18,4 @@ provider "proxmox" {
   }
 }
 
-provider "ansible" {}
+provider "talos" {}

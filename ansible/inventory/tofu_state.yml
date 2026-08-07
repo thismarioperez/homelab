@@ -1,3 +1,7 @@
+# testlab moved to Talos (no SSH, no ansible_host resources in
+# tofu/testlab) so this currently has no live target — kept in place for
+# any future Ubuntu-VM project (e.g. tofu/lab) that reintroduces
+# ansible_host resources.
 plugin: cloud.terraform.terraform_provider
 binary_path: tofu
 project_path: ../tofu/testlab
