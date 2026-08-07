@@ -1,0 +1,17 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: pihole
+spec:
+  interval: 1h
+  url: oci://oci.trueforge.org/truecharts/pihole
+  ref:
+    tag: 20.0.3
+  # TrueCharts' manifest lists a .prov (provenance) layer before the chart
+  # content layer; without this, Flux grabs the first layer and fails with
+  # "requires gzip-compressed body" trying to gunzip the non-gzip .prov
+  # data. See https://github.com/fluxcd/flux2/issues/5788.
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy

@@ -6,3 +6,4 @@ namespace: default
 resources:
   - namespace.yaml
   - snapdrop/app.ks.yaml
+  - pihole/app.ks.yaml

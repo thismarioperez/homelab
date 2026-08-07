@@ -1,0 +1,32 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: pihole
+spec:
+  interval: 10m
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: default
+
+  path: ./kubernetes/testlab/apps/default/pihole/app
+  components:
+    - ../../../../components/volsync/
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+
+  postBuild:
+    substitute:
+      APP: pihole
+      VOLSYNC_NAMESPACE: default
+      VOLSYNC_PVC: pihole-config
+      VOLSYNC_CAPACITY: 4Gi
+
+  dependsOn:
+    - name: gateway
+      namespace: kube-system
+    - name: volsync
+      namespace: storage-system
