@@ -8,3 +8,10 @@ spec:
   url: oci://oci.trueforge.org/truecharts/snapdrop
   ref:
     tag: 13.7.0
+  # TrueCharts' manifest lists a .prov (provenance) layer before the chart
+  # content layer; without this, Flux grabs the first layer and fails with
+  # "requires gzip-compressed body" trying to gunzip the non-gzip .prov
+  # data. See https://github.com/fluxcd/flux2/issues/5788.
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy

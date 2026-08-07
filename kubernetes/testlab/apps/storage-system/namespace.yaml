@@ -2,3 +2,9 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: storage-system
+  labels:
+    # csi-driver-nfs's controller/node pods need hostNetwork, SYS_ADMIN,
+    # privileged mode, and hostPath mounts to do their CSI driver job —
+    # Talos's default PodSecurity admission config enforces `baseline` on
+    # namespaces with no explicit level, which forbids all of that.
+    pod-security.kubernetes.io/enforce: privileged
