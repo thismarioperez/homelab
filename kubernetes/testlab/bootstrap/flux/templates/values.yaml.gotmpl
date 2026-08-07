@@ -1,0 +1,3 @@
+{{ $helmReleasePath := printf "../../../apps/flux-system/flux-instance/app/helm-release.yaml" }}
+{{ $helmRelease := fromYaml (readFile $helmReleasePath) }}
+{{ $helmRelease.spec.values | toYaml }}

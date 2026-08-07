@@ -22,7 +22,7 @@ variable "op_vault_name" {
 
 variable "op_items" {
   type        = map(string)
-  description = "Map of logical secret name to 1Password item title: vm_login (VM cloud-init username/password), vm_ssh_key (VM cloud-init SSH key), proxmox_api (Proxmox API token id/secret), proxmox_ssh (Proxmox node SSH username/password), opnsense_api (OPNsense API key/secret)"
+  description = "Map of logical secret name to 1Password item title: proxmox_api (Proxmox API token id/secret), proxmox_ssh (Proxmox node SSH username/password), opnsense_api (OPNsense API key/secret)"
 }
 
 variable "opnsense_endpoint" {
@@ -48,56 +48,74 @@ variable "vm_cores" {
   default     = 2
 }
 
-variable "k3s_controller_disk_size" {
+variable "k8s_controller_disk_size" {
   type        = string
-  description = "Disk size for k3s controller VMs"
+  description = "Disk size for k8s controller VMs"
   default     = "80G"
 }
 
-variable "k3s_worker_disk_size" {
+variable "k8s_worker_disk_size" {
   type        = string
-  description = "Disk size for k3s worker VMs"
+  description = "Disk size for k8s worker VMs"
   default     = "620G"
 }
 
-variable "k3s_controller_memory" {
+variable "k8s_controller_memory" {
   type        = number
-  description = "Memory (MB) for k3s controller VMs"
+  description = "Memory (MB) for k8s controller VMs"
   default     = 6144
 }
 
-variable "k3s_worker_memory" {
+variable "k8s_worker_memory" {
   type        = number
-  description = "Memory (MB) for k3s worker VMs"
+  description = "Memory (MB) for k8s worker VMs"
   default     = 18432
 }
 
-variable "k3s_vm_subnet_cidr" {
+variable "k8s_vm_subnet_cidr" {
   type        = string
-  description = "CIDR of the subnet backing var.vlan_id, used to resolve the OPNsense Kea subnet for k3s VM/VIP DHCP reservations"
+  description = "CIDR of the subnet backing var.vlan_id, used to resolve the OPNsense Kea subnet for k8s VM/VIP DHCP pool-exclusion reservations and to derive the prefix length for k8s VM static IPs"
   default     = "10.30.60.0/24"
 }
 
-variable "k3s_apiserver_vip" {
+variable "k8s_vm_subnet_gateway" {
   type        = string
-  description = "IP address reserved (excluded from the DHCP dynamic pool) for kube-vip to announce as the k3s control plane's floating apiserver address. Must stay outside the subnet's DHCP dynamic pool and not collide with other static reservations"
+  description = "Gateway IP for var.k8s_vm_subnet_cidr, used as both the Talos VMs' default route and DNS resolver (OPNsense serves both roles on this subnet)"
+  default     = "10.30.60.1"
+}
+
+variable "talos_apiserver_vip" {
+  type        = string
+  description = "IP address reserved (excluded from the DHCP dynamic pool) for Talos's native VIP mechanism to announce as the control plane's floating apiserver address. Must stay outside the subnet's DHCP dynamic pool and not collide with other static reservations"
   default     = "10.30.60.10"
 }
 
-variable "k3s_lb_ip" {
+variable "talos_version" {
+  type        = string
+  description = "Talos Linux version to provision (pinned, not \"latest\") — used for both the Image Factory disk image and the generated machine config"
+  default     = "v1.13.8"
+}
+
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes version to provision — versioned independently of talos_version, unlike k3s where they're the same artifact"
+  default     = "1.34.0"
+}
+
+variable "k8s_lb_ip" {
   type        = string
   description = "IP address reserved (excluded from the DHCP dynamic pool) for MetalLB to announce as the cluster's single LoadBalancer address. Must stay outside the subnet's DHCP dynamic pool and not collide with other static reservations"
   default     = "10.30.60.11"
 }
 
-variable "k3s_controller_ips" {
+variable "k8s_controller_ips" {
   type        = list(string)
-  description = "Static IPs to reserve for k3s controller (server) nodes, one per node; list length determines the controller count"
+  description = "Static IPs to reserve for k8s controller (server) nodes, one per node; list length determines the controller count"
   default     = ["10.30.60.12"]
 }
 
-variable "k3s_worker_ips" {
+variable "k8s_worker_ips" {
   type        = list(string)
-  description = "Static IPs to reserve for k3s worker (agent) nodes, one per node; list length determines the worker count"
+  description = "Static IPs to reserve for k8s worker (agent) nodes, one per node; list length determines the worker count"
   default     = ["10.30.60.13"]
 }

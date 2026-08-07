@@ -6,8 +6,10 @@ opentofu = "1.12"
 node = "lts"
 kubectl = "1.36"
 kubeconform = "latest"
+talosctl = "latest"
 helm = "3"
 helmfile = "latest"
+flux2 = "latest"
 yq = "latest"
 1password-cli = "latest"
 python = "3"
@@ -58,116 +60,68 @@ depends = [
 ]
 
 [tasks."ansible:testlab:inventory"]
-description = "show the ansible inventory for tofu/testlab, sourced live from tofu state"
+description = "show the ansible inventory for tofu/testlab, sourced live from tofu state — empty today (testlab runs Talos, which has no ansible_host resources); kept for any future Ubuntu-based project"
 dir = "{{config_root}}/ansible"
 run = "ansible-inventory --graph"
 
 [tasks."ansible:testlab:ping"]
-description = "ping all tofu/testlab hosts over ssh"
+description = "ping all tofu/testlab hosts over ssh — no live hosts today (testlab runs Talos, which has no SSH); kept for any future Ubuntu-based project"
 dir = "{{config_root}}/ansible"
 run = "ansible-playbook playbooks/ping.yml"
 
 [tasks."ansible:testlab:ubuntu-upgrade"]
-description = "full-upgrade apt packages on all tofu/testlab hosts, rebooting if required"
+description = "full-upgrade apt packages on all tofu/testlab hosts, rebooting if required — no live hosts today (testlab runs Talos, which has no SSH); kept for any future Ubuntu-based project"
 dir = "{{config_root}}/ansible"
 run = "ansible-playbook playbooks/ubuntu_upgrade.yml"
 
-[tasks."ansible:testlab:k3s-install"]
-description = "provision k3s on all tofu/testlab hosts (k3s-io/k3s-ansible)"
-dir = "{{config_root}}/ansible"
-env = { ANSIBLE_FORKS = "1" }
-run = "ansible-playbook playbooks/k3s_install.yml"
-
-[tasks."ansible:testlab:k3s-uninstall"]
-description = "de-provision k3s on all tofu/testlab hosts (k3s-io/k3s-ansible)"
-dir = "{{config_root}}/ansible"
-run = "ansible-playbook playbooks/k3s_uninstall.yml"
-
-[tasks."ansible:testlab:kubeconfig"]
-description = "fetch the testlab k3s kubeconfig to ansible/.cache/testlab-kubeconfig.yaml, pointed at the kube-vip apiserver VIP"
-dir = "{{config_root}}/ansible"
-run = "ansible-playbook playbooks/k3s_fetch_kubeconfig.yml"
-
-[tasks."kubernetes:testlab:render-metallb-config"]
-description = "render the MetalLB LB IP (from tofu/testlab's k3s_lb_ip output) into apps/metallb-system/lb.env if it hasn't been rendered yet — delete the file first to force a re-render after the reserved IP changes"
+[tasks."talos:testlab:kubeconfig"]
+description = "write the testlab Talos cluster kubeconfig to tofu/testlab/.cache/kubeconfig.yaml from tofu state"
 dir = "{{config_root}}/tofu/testlab"
 env = { _.file = "{{config_root}}/tofu/testlab/.env" }
-run = "test -f {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env || echo \"LB_IP=$(tofu output -raw k3s_lb_ip)/32\" > {{config_root}}/kubernetes/testlab/apps/metallb-system/lb.env"
+run = "mkdir -p .cache && tofu output -raw talos_kubeconfig > .cache/kubeconfig.yaml"
 
-[tasks."kubernetes:testlab:apply-volumesnapshot-crds"]
-description = "apply the snapshot.storage.k8s.io CRDs VolSync's controller requires at startup (crashloops without them, even though this repo never uses copyMethod: Snapshot) — via bootstrap/crds/apply-volumesnapshot-crds.sh — must run before apply-crds"
-dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
-run = "./apply-volumesnapshot-crds.sh"
+[tasks."talos:testlab:talosconfig"]
+description = "write the testlab talosconfig (talosctl client config) to tofu/testlab/.cache/talosconfig from tofu state"
+dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
+run = "mkdir -p .cache && tofu output -raw talos_config > .cache/talosconfig"
 
-[tasks."kubernetes:testlab:apply-crds"]
-description = "extract and apply CRDs bundled in testlab helm charts, stamped with Helm ownership metadata so helmfile sync can adopt them — via bootstrap/crds/apply.sh — must run before apply-charts and apply-manifests"
-dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
-depends = ["kubernetes:testlab:apply-volumesnapshot-crds"]
-run = "./apply.sh"
+[tasks."k9s:testlab"]
+description = "launch k9s against the testlab cluster kubeconfig"
+depends = ["talos:testlab:kubeconfig"]
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "k9s"
 
-[tasks."kubernetes:testlab:apply-charts"]
-description = "sync all testlab helm chart releases via helmfile"
-dir = "{{config_root}}/kubernetes/testlab"
-depends = ["kubernetes:testlab:render-metallb-config", "kubernetes:testlab:apply-crds"]
+[tasks."kubernetes:testlab:render-metallb-config"]
+description = "apply the MetalLB LB IP (from tofu/testlab's k8s_lb_ip output) as the metallb-config ConfigMap Flux substitutes into IPAddressPool — safe to re-run any time the reserved IP changes"
+dir = "{{config_root}}/tofu/testlab"
+depends = ["talos:testlab:kubeconfig"]
+env = { _.file = "{{config_root}}/tofu/testlab/.env", KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "kubectl create configmap metallb-config --from-literal=LB_IP=\"$(tofu output -raw k8s_lb_ip)/32\" -n metallb-system --dry-run=client -o yaml | kubectl apply -f -"
+
+[tasks."kubernetes:testlab:bootstrap-flux"]
+description = "one-time bootstrap of Flux itself (flux-operator + flux-instance via helmfile) — Flux takes over reconciling everything else in apps/ from here on; must run after bootstrap (ESO secret)"
+dir = "{{config_root}}/kubernetes/testlab/bootstrap/flux"
+depends = ["kubernetes:testlab:bootstrap", "kubernetes:testlab:render-metallb-config"]
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = "helmfile sync"
 
-[tasks."kubernetes:testlab:wait-eso-webhook"]
-description = "wait for the External Secrets webhook to be ready — apply-manifests' ClusterSecretStore create fails if it races ahead of this on a fresh install"
-run = "kubectl wait pod -n security-system -l app.kubernetes.io/name=external-secrets-webhook --for=condition=Ready --timeout=90s"
-
-[tasks."kubernetes:testlab:wait-metallb-webhook"]
-description = "wait for the MetalLB controller (which also serves its validating webhook) to be ready — apply-manifests' IPAddressPool/L2Advertisement create fails if it races ahead of this on a fresh install"
-run = "kubectl wait pod -n metallb-system -l app.kubernetes.io/component=controller --for=condition=Ready --timeout=90s"
-
-[tasks."kubernetes:testlab:apply-manifests"]
-description = "apply testlab raw kubernetes manifests (namespaces, CRs, routes) via kustomize, retrying on transient webhook-not-ready errors — see apply-testlab-manifests.sh"
-dir = "{{config_root}}/kubernetes"
-depends = ["kubernetes:testlab:wait-eso-webhook", "kubernetes:testlab:wait-metallb-webhook"]
-run = "./apply-testlab-manifests.sh"
-
-[tasks."kubernetes:testlab:apply"]
-description = "apply the full testlab stack: CRDs, then helm chart releases, then raw manifests"
-depends = ["kubernetes:testlab:apply-charts"]
-depends_post = ["kubernetes:testlab:apply-manifests"]
-run = "true"
-
-[tasks."kubernetes:testlab:diff"]
-description = "diff testlab helm chart releases and raw manifests against the cluster"
-dir = "{{config_root}}/kubernetes/testlab"
-depends = ["kubernetes:testlab:render-metallb-config"]
+[tasks."kubernetes:testlab:flux-status"]
+description = "show the reconciliation status of every Flux Kustomization/HelmRelease in the testlab cluster"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = [
-  "helmfile diff",
-  "kubectl diff -k {{config_root}}/kubernetes/testlab",
+  "flux get kustomizations -A",
+  "flux get helmreleases -A",
 ]
 
 [tasks."kubernetes:testlab:bootstrap"]
 description = "one-time bootstrap of secrets that can't be managed in-cluster yet — currently ESO's own 1Password service account token into the security-system namespace (chicken-and-egg: ESO isn't running yet to manage this itself)"
+depends = ["talos:testlab:kubeconfig"]
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = [
   "kubectl create namespace security-system --dry-run=client -o yaml | kubectl apply -f -",
-  "kubectl create secret generic onepassword-service-account-token --from-literal=token=\"$(op item get 'Service Account Auth Token: testlab k3s eso' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
+  "kubectl create secret generic onepassword-service-account-token --from-literal=token=\"$(op item get '1Password Service Account Auth Token: testlab k8s eso' --vault 'Home Network' --fields label=credential --reveal)\" -n security-system --dry-run=client -o yaml | kubectl apply -f -",
 ]
-
-[tasks."kubernetes:testlab:delete"]
-description = "delete testlab helm chart releases and raw manifests from the cluster — does NOT remove CRDs, see kubernetes:testlab:delete-crds"
-dir = "{{config_root}}/kubernetes/testlab"
-run = [
-  "helmfile destroy",
-  # kubectl delete -k testlab (unfiltered) always fails on `default`: it's
-  # declared in apps/default/namespace.yaml so `apply -k` can reconcile it,
-  # but k8s refuses to ever delete the default namespace. Filter it out so
-  # this task exits cleanly instead of erroring on the very last resource.
-  "kubectl kustomize {{config_root}}/kubernetes/testlab | yq ea 'select(.kind != \"Namespace\" or .metadata.name != \"default\")' - | kubectl delete --ignore-not-found -f -",
-]
-
-[tasks."kubernetes:testlab:delete-crds"]
-description = "delete all CRDs bundled by testlab helm charts (see bootstrap/crds/helmfile.yaml) — cascade-deletes every custom resource of that kind cluster-wide, run only for a full from-nothing retry, never as routine teardown"
-dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
-run = "./delete.sh"
-
-[tasks."kubernetes:testlab:delete-volumesnapshot-crds"]
-description = "delete the snapshot.storage.k8s.io CRDs applied by apply-volumesnapshot-crds — cascade-deletes every VolumeSnapshot cluster-wide, run only for a full from-nothing retry, never as routine teardown"
-dir = "{{config_root}}/kubernetes/testlab/bootstrap/crds"
-run = "./delete-volumesnapshot-crds.sh"
 
 [tasks."kubernetes:yamllint"]
 description = "check kubernetes yaml formatting with yamllint"
@@ -175,13 +129,9 @@ dir = "{{config_root}}/kubernetes"
 run = "yamllint ."
 
 [tasks."kubernetes:testlab:validate"]
-description = "validate rendered testlab helm chart and kustomize output against the k8s schema"
+description = "validate rendered testlab kustomize output (Flux Kustomization/HelmRelease/HelmRepository/OCIRepository CRs — Flux's helm-controller inflates the actual chart output in-cluster, not here) against the k8s schema"
 dir = "{{config_root}}/kubernetes/testlab"
-depends = ["kubernetes:testlab:render-metallb-config"]
-run = [
-  "helmfile template | kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'",
-  "kubectl kustomize {{config_root}}/kubernetes/testlab | kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'",
-]
+run = "kubectl kustomize . | kubeconform -strict -ignore-missing-schemas -kubernetes-version 1.36.0 -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{% raw %}{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}{% endraw %}.json'"
 
 [tasks."kubernetes:check"]
 description = "check formatting and validity of kubernetes manifests"

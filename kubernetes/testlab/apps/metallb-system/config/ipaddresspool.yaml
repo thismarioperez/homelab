@@ -1,0 +1,20 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: k8s-lb
+  namespace: metallb-system
+spec:
+  addresses:
+    # Substituted at Flux reconcile time from the metallb-config ConfigMap
+    # (postBuild.substituteFrom on the config Kustomization below) —
+    # rendered from tofu/testlab's k8s_lb_ip output.
+    - ${LB_IP}
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: k8s-lb
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - k8s-lb

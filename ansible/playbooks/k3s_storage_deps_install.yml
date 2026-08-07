@@ -1,9 +1,0 @@
-- name: Install/Enable storage tools (nfs/iscsi)
-  hosts: k3s_cluster
-  become: true
-  tasks:
-    - name: Install nfs-common for NFS-backed persistent storage
-      ansible.builtin.apt:
-        name: nfs-common
-        state: present
-        update_cache: true

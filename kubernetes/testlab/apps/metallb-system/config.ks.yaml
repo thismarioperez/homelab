@@ -1,0 +1,30 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metallb-config
+spec:
+  interval: 10m
+  prune: true
+  wait: true
+  timeout: 5m
+  targetNamespace: metallb-system
+
+  path: ./kubernetes/testlab/apps/metallb-system/config
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+
+  postBuild:
+    substituteFrom:
+      # Created by `mise run kubernetes:testlab:render-metallb-config` into
+      # this same namespace. optional: false so a missing ConfigMap fails the
+      # reconcile loudly instead of rendering a literal ${LB_IP}.
+      - kind: ConfigMap
+        name: metallb-config
+        optional: false
+
+  dependsOn:
+    - name: metallb
+      namespace: metallb-system

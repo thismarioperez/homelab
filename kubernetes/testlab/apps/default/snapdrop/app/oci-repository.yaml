@@ -1,0 +1,10 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: snapdrop
+spec:
+  interval: 1h
+  url: oci://oci.trueforge.org/truecharts/snapdrop
+  ref:
+    tag: 13.7.0

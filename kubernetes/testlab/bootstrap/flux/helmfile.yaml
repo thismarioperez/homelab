@@ -1,0 +1,18 @@
+# One-time bootstrap only — never re-run once Flux is reconciling. Installs
+# the flux-operator and a FluxInstance (via the flux-instance chart), which
+# together create every other Flux controller/CRD. From here on, this
+# testlab stack's own desired state (kubernetes/testlab/apps/) is what
+# drives the cluster, not this file.
+releases:
+  - name: flux-operator
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+    version: 0.57.0
+    createNamespace: true
+
+  - name: flux-instance
+    namespace: flux-system
+    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
+    version: 0.57.0
+    needs: ["flux-system/flux-operator"]
+    values: ["templates/values.yaml.gotmpl"]

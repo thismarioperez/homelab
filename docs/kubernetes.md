@@ -1,16 +1,16 @@
 # Kubernetes
 
-Cluster standup steps and resource distribution for the k3s clusters in
-this repo.
+Cluster standup steps and resource distribution for the Kubernetes clusters
+in this repo.
 
 ## Standing up a fresh cluster
 
-End-to-end steps to bring up the `testlab` k3s cluster from nothing:
-Proxmox VMs, k3s, and the full app stack. Assumes
+End-to-end steps to bring up the `testlab` Talos cluster from nothing:
+Proxmox VMs, Talos, and the full app stack. Assumes
 [workstation setup](workstation-setup.md) is already done (tools installed,
 1Password auth configured, tofu state backend reachable).
 
-### 1. Provision the VMs (OpenTofu)
+### 1. Provision the VMs and bootstrap the cluster (OpenTofu)
 
 ```bash
 mise run tofu:testlab:init
@@ -18,34 +18,36 @@ mise run tofu:testlab:plan
 mise run tofu:testlab:apply
 ```
 
-Creates the controller and worker VMs on Proxmox per `tofu/testlab/` (see
-[resource distribution](#testlab) below for sizing).
+Creates the controller and worker VMs on Proxmox, applies Talos machine
+config, bootstraps etcd, and produces a kubeconfig/talosconfig — all in one
+`tofu apply` — per `tofu/testlab/` (see [resource distribution](#testlab)
+below for sizing). No separate OS-install/Ansible step is needed: Talos has
+no SSH or cloud-init, so the `siderolabs/talos` provider resources in
+`tofu/testlab/talos.tf` handle everything node-level directly.
 
-### 2. Install k3s (Ansible)
+### 2. Fetch the kubeconfig
 
 ```bash
-mise run ansible:install-collections
-mise run ssh:add-key
-mise run ansible:testlab:inventory   # sanity check
-mise run ansible:testlab:ping        # confirm SSH connectivity
-mise run ansible:testlab:k3s-install # provisions k3s via k3s-io/k3s-ansible
+mise run talos:testlab:kubeconfig
 ```
 
-### 3. Fetch the kubeconfig
+Writes `tofu/testlab/.cache/kubeconfig.yaml`, pointed at Talos's native VIP
+for the control plane's floating apiserver address.
 
 ```bash
-mise run ansible:testlab:kubeconfig
-```
-
-Writes `ansible/.cache/testlab-kubeconfig.yaml`, pointed at the kube-vip
-API server VIP.
-
-```bash
-export KUBECONFIG=ansible/.cache/testlab-kubeconfig.yaml
+export KUBECONFIG=tofu/testlab/.cache/kubeconfig.yaml
 kubectl get nodes
 ```
 
-### 4. Bootstrap the ESO secret
+Optionally also fetch a talosconfig for `talosctl` access (useful for
+`talosctl -n <ip> dashboard`/`logs` debugging):
+
+```bash
+mise run talos:testlab:talosconfig
+export TALOSCONFIG=tofu/testlab/.cache/talosconfig
+```
+
+### 3. Bootstrap the ESO secret
 
 External Secrets Operator can't resolve any `ExternalSecret` — including
 its own `ClusterSecretStore` — until its 1Password service account token
@@ -56,35 +58,54 @@ out-of-band before anything else can manage secrets for itself:
 mise run kubernetes:testlab:bootstrap
 ```
 
-Requires the `Service Account Auth Token: testlab k3s eso` item in the
+Requires the `1Password Service Account Auth Token: testlab k8s eso` item in the
 `Home Network` 1Password vault (see
-[`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/external-secrets/cluster-secret-store.yaml)).
+[`cluster-secret-store.yaml`](../kubernetes/testlab/apps/security-system/external-secrets/app/cluster-secret-store.yaml)).
 
-### 5. Apply the full stack
+### 4. Bootstrap Flux
 
 ```bash
-mise run kubernetes:testlab:apply
+mise run kubernetes:testlab:bootstrap-flux
 ```
 
-Runs, in order: `render-metallb-config` (writes MetalLB's reserved LB IP
-from tofu output) → `apply-volumesnapshot-crds` (applies the
-`snapshot.storage.k8s.io` CRDs VolSync's controller requires at startup) →
-`apply-crds` (pre-applies CRDs bundled by charts, via
-[`bootstrap/crds/`](../kubernetes/testlab/bootstrap/crds/README.md)) →
-`apply-charts` (`helmfile sync`) → `apply-manifests`
-(`kubectl apply -k testlab`).
+Runs, in order: `bootstrap` (the ESO secret, step 3, if not already done) →
+`render-metallb-config` (applies MetalLB's reserved LB IP, from tofu output,
+as the `metallb-config` ConfigMap Flux substitutes into `IPAddressPool`) →
+a one-time `helmfile sync` against
+[`bootstrap/flux/helmfile.yaml`](../kubernetes/testlab/bootstrap/flux/helmfile.yaml),
+installing `flux-operator` and a `FluxInstance` (via the `flux-instance`
+chart). From this point on, Flux owns reconciliation: it watches this
+repo's `main` branch at `kubernetes/testlab/apps/` and applies every
+`Kustomization`/`HelmRelease` it finds there — including its own
+`flux-instance`, so future upgrades to Flux itself also flow through git
+instead of a manual `helmfile sync`. This bootstrap step is never re-run
+except to recover a cluster where Flux itself is broken.
 
-### 6. Verify
+Talos ships no Traefik, no `local-path-provisioner`, and no default
+CNI-agnostic Gateway API implementation the way k3s did — Flux installs
+`traefik` and `local-path-provisioner` as first-class `HelmRelease`s (see
+`kubernetes/testlab/apps/kube-system/`) to replace those former k3s
+built-ins. Talos deploys its default Flannel CNI automatically; this repo
+doesn't override that choice for `testlab`.
+
+### 5. Verify
 
 ```bash
 mise run kubernetes:testlab:validate    # schema-validates rendered output
+mise run kubernetes:testlab:flux-status # shows Flux Kustomization/HelmRelease reconciliation status
 kubectl get pods -A
 kubectl get clustersecretstore onepassword   # should show Valid
+kubectl get gatewayclass traefik            # should show ACCEPTED
+kubectl get storageclass                    # local-path should show (default)
 ```
+
+Once verified, any further change is just a git commit to
+`kubernetes/testlab/apps/` on `main` — Flux picks it up on its next
+`sync.interval` (5m), no manual apply step needed.
 
 ## Resource distribution
 
-Living doc tracking how host resources are budgeted across the k3s VMs for
+Living doc tracking how host resources are budgeted across the VMs for
 each cluster in this repo. Updated whenever VM counts/sizes change.
 
 ## testlab
@@ -92,12 +113,22 @@ each cluster in this repo. Updated whenever VM counts/sizes change.
 Runs entirely on the single [testlab host](hardware.md#testlab-host) (Intel
 NUC6i5SYH, 2 cores / 4 threads, 32GB RAM, 1TB ZFS-backed `storage`
 datastore, thick-provisioned). Its purpose is to validate the MetalLB +
-Traefik Gateway API + kube-vip pattern — stable, reserved IPs for both the
-control plane (`k3s_apiserver_vip`) and services (`k3s_lb_ip`) — in
+Traefik Gateway API + Talos VIP pattern — stable, reserved IPs for both the
+control plane (`talos_apiserver_vip`) and services (`k3s_lb_ip`) — in
 isolation from the production `lab` cluster, ahead of building that same
 pattern into `lab`. It does not test HA failover behavior; a single
 controller and single worker are enough to prove the pattern, and real
 multi-controller HA will be exercised on `lab` instead.
+
+testlab originally ran k3s, installed via Ansible. It was rebuilt from
+scratch (destroy + recreate, not an in-place upgrade — none exists between
+k3s and Talos) onto Talos Linux, provisioned entirely by OpenTofu via the
+[`siderolabs/talos`](https://registry.terraform.io/providers/siderolabs/talos/latest)
+provider (`tofu/testlab/talos.tf`). VM provisioning uses a new
+`tofu/modules/talos-vm` module, mirroring the existing `tofu/modules/ubuntu-vm`
+module's shape but without any cloud-init/SSH concepts. `ansible/` remains
+in the repo for any future Ubuntu-VM use; only its k3s/kube-vip-specific
+playbooks were removed.
 
 ### Host RAM budget (32GB)
 
@@ -129,8 +160,8 @@ after the first sizing pass came in over budget.
 
 ### Per-role VM sizing
 
-Defined in `tofu/testlab/variables.tf`, applied via the `k3s_vm_controller`
-and `k3s_vm_worker` module blocks in `tofu/testlab/main.tf`.
+Defined in `tofu/testlab/variables.tf`, applied via the `k8s_vm_controller`
+and `k8s_vm_worker` module blocks in `tofu/testlab/main.tf`.
 
 | Role       | Count | Cores each | Memory each      | Disk each | Memory total | Disk total |
 | ---------- | ----- | ---------- | ---------------- | --------- | ------------ | ---------- |
@@ -139,14 +170,15 @@ and `k3s_vm_worker` module blocks in `tofu/testlab/main.tf`.
 | **Total**  | 2     | 4          |                  |           | **24 GB**    | **700 GB** |
 
 4 vCPU total — the first topology here that doesn't oversubscribe the
-host's 4 threads. The controller gets just enough for the OS, etcd, k3s
-server, and kube-vip; the worker gets the bulk of both budgets since it's
+host's 4 threads. The controller gets just enough for the OS, etcd, and the
+Talos control plane; the worker gets the bulk of both budgets since it's
 where Traefik, MetalLB's speaker, and test workloads actually run.
 
 ### Persistent storage
 
-k3s's built-in `local-path-provisioner` is the default StorageClass for
-general-purpose PVCs, backed by the worker's local disk.
+`local-path-provisioner` (a Flux `HelmRelease`, replacing what k3s used to
+bundle by default) is the default StorageClass for general-purpose PVCs,
+backed by the worker's local disk.
 
 A separate `nfs.csi.k8s.io` StorageClass (`nfs-backups`, non-default,
 `kubernetes/testlab/apps/storage-system/csi-driver-nfs`) is reserved for

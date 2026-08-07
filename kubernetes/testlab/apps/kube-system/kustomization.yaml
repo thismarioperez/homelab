@@ -4,5 +4,6 @@ kind: Kustomization
 namespace: kube-system
 
 resources:
-  - helmchartconfig.yaml
-  - gateway.yaml
+  - traefik/app.ks.yaml
+  - local-path-provisioner/app.ks.yaml
+  - gateway.ks.yaml
