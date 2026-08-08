@@ -141,6 +141,28 @@ resource "talos_machine_configuration_apply" "worker" {
         "$patch" = "delete"
       }
     }),
+    # Talos's root filesystem is ephemeral/read-only by design, so kubelet
+    # (and containers it starts, e.g. Longhorn's manager/engine pods) can't
+    # see host paths outside what's explicitly bind-mounted in. Longhorn's
+    # defaultDataPath (kubernetes/testlab/apps/storage-system/longhorn)
+    # needs this or every volume fails to schedule a replica with "No
+    # available disk candidates" — the manager reports the disk but the
+    # underlying path was never actually accessible to it.
+    # https://longhorn.io/docs/1.9.1/advanced-resources/os-distro-specific/talos-linux-support/
+    yamlencode({
+      machine = {
+        kubelet = {
+          extraMounts = [
+            {
+              destination = "/var/lib/longhorn"
+              type        = "bind"
+              source      = "/var/lib/longhorn"
+              options     = ["bind", "rshared", "rw"]
+            },
+          ]
+        }
+      }
+    }),
   ]
 }
 

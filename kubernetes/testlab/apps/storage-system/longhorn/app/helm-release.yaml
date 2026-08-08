@@ -30,9 +30,13 @@ spec:
       # in-cluster replication is redundant with off-cluster restic/B2
       # backups — see components/volsync's restic ReplicationSource.
       defaultReplicaCount: 1
-      # NFS-backed nfs-backups StorageClass remains for anything that
-      # still wants it; Longhorn only needs local node disk.
-      createDefaultDiskLabeledNodes: true
+      # createDefaultDiskLabeledNodes gates disk creation behind the
+      # node.longhorn.io/create-default-disk label, which nothing in this
+      # cluster applies — left at its default (false) so Longhorn creates
+      # a default disk (defaultDataPath) on every schedulable node instead,
+      # matching the single-worker topology here with no special disk
+      # layout to opt into per-node.
+      defaultDataPath: /var/lib/longhorn
 
     # Talos labels controllers with node-role.kubernetes.io/control-plane
     # but applies no positive label to workers, so "worker" is expressed as
