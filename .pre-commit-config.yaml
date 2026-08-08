@@ -29,3 +29,10 @@ repos:
         language: system
         files: \.(ya?ml|md|json)$
         pass_filenames: false
+
+      - id: shellcheck
+        name: shellcheck
+        entry: mise run scripts:check
+        language: system
+        files: \.sh$
+        pass_filenames: false

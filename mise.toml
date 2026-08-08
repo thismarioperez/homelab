@@ -299,3 +299,7 @@ run = "prettier --write ."
 [tasks."format:prettier-check"]
 description = "check yaml, markdown, and json formatting without modifying files"
 run = "prettier --check ."
+
+[tasks."scripts:check"]
+description = "lint all shell scripts with shellcheck"
+run = "shellcheck scripts/*.sh"

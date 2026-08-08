@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# shellcheck disable=SC2034 # kept for future use
 CYAN='\033[1;36m'
 RED='\033[1;31m'
 NC='\033[0m'
@@ -8,7 +9,7 @@ NC='\033[0m'
 APP="$1"
 NS="$2"
 
-kubectl run volsync-snapshots-${APP} --restart=Never \
+kubectl run volsync-snapshots-"${APP}" --restart=Never \
     --image=restic/restic:latest \
     -n "${NS}" \
     --overrides="{
@@ -23,20 +24,21 @@ kubectl run volsync-snapshots-${APP} --restart=Never \
     }" &>/dev/null
 
 # Wait for pod to finish, checking every 2s for bad states (timeout 60s)
+# shellcheck disable=SC2034 # loop counter, unused by design
 for i in $(seq 1 30); do
-    PHASE=$(kubectl get pod/volsync-snapshots-${APP} -n "${NS}" \
+    PHASE=$(kubectl get pod/volsync-snapshots-"${APP}" -n "${NS}" \
         -o jsonpath='{.status.phase}' 2>/dev/null)
-    WAITING=$(kubectl get pod/volsync-snapshots-${APP} -n "${NS}" \
+    WAITING=$(kubectl get pod/volsync-snapshots-"${APP}" -n "${NS}" \
         -o jsonpath='{.status.containerStatuses[0].state.waiting.reason}' 2>/dev/null)
     if [ "${PHASE}" = "Succeeded" ]; then
         break
-    elif [ "${PHASE}" = "Failed" ] || ([ -n "${WAITING}" ] && [ "${WAITING}" != "ContainerCreating" ]); then
+    elif [ "${PHASE}" = "Failed" ] || { [ -n "${WAITING}" ] && [ "${WAITING}" != "ContainerCreating" ]; }; then
         echo -e "${RED}ERROR: Pod failed to start (phase=${PHASE:-Pending}, reason=${WAITING:-unknown})${NC}"
-        kubectl delete pod/volsync-snapshots-${APP} -n "${NS}" --ignore-not-found &>/dev/null
+        kubectl delete pod/volsync-snapshots-"${APP}" -n "${NS}" --ignore-not-found &>/dev/null
         exit 1
     fi
     sleep 2
 done
 
-kubectl logs pod/volsync-snapshots-${APP} -n "${NS}"
-kubectl delete pod/volsync-snapshots-${APP} -n "${NS}" --ignore-not-found &>/dev/null
+kubectl logs pod/volsync-snapshots-"${APP}" -n "${NS}"
+kubectl delete pod/volsync-snapshots-"${APP}" -n "${NS}" --ignore-not-found &>/dev/null
