@@ -209,7 +209,7 @@ run = [
   OPNSENSE_ALLOW_INSECURE=$(grep -E '^opnsense_allow_insecure' terraform.tfvars | awk '{print $NF}') \
   OPNSENSE_USERNAME=$(op item get 'OPNsense- tofu' --vault 'Home Network' --fields label=username --reveal) \
   OPNSENSE_PASSWORD=$(op item get 'OPNsense- tofu' --vault 'Home Network' --fields label=password --reveal) \
-  ./scripts/clear-dhcp-leases.sh \
+  ../../scripts/opnsense-clear-dhcp-leases.sh \
     $(tofu output -raw talos_apiserver_vip) \
     $(tofu output -raw k8s_lb_ip) \
     $(tofu output -json vm_network_info | jq -r '.[].ip_address')

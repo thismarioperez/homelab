@@ -72,7 +72,7 @@ resource "opnsense_kea_dhcpv4_reservation" "k8s_vm" {
 # destroyed — a stale lease for the same MAC/IP can survive a tofu destroy
 # and get reissued to that MAC on next boot, causing the VM to keep the old
 # leased address instead of the (recreated) reservation's IP until the
-# lease naturally expires. tofu/testlab/scripts/clear-dhcp-leases.sh (run
+# lease naturally expires. scripts/opnsense-clear-dhcp-leases.sh (run
 # via the tofu:testlab:clear-leases / tofu:testlab:destroy mise tasks)
 # clears each VM's lease through the OPNsense API before destroy to avoid
 # this — see that script for the GUI-session-login mechanics required to

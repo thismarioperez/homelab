@@ -13,7 +13,7 @@
 # GUI session: log into the web UI form to get a session cookie + CSRF
 # token, then use both on the delete request.
 #
-# Usage: clear-dhcp-leases.sh <ip> [ip...]
+# Usage: opnsense-clear-dhcp-leases.sh <ip> [ip...]
 # Requires OPNSENSE_URL, OPNSENSE_USERNAME, OPNSENSE_PASSWORD in the
 # environment. Never fails the caller for a missing/already-gone lease —
 # only for a login/session failure or if every delete attempt errors out.
