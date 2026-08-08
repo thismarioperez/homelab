@@ -11,7 +11,7 @@ provisioned with OpenTofu, configured with Ansible.
 - [Backblaze B2 Tofu state backend](docs/backblaze-b2-tofu-state.md)
 - [OPNsense Bruno collection](docs/collections/OPNsense/README.md) — for
   exploring the OPNsense router's REST API
-- [Hardware](docs/hardware.md) — physical devices in the lab
+- [Hardware](docs/hardware/README.md) — physical devices in the lab
 - [Kubernetes](docs/kubernetes.md) — cluster standup steps and resource
   distribution across cluster VMs
 
@@ -22,7 +22,7 @@ provisioned with OpenTofu, configured with Ansible.
 - [x] Improve `testlab` tofu project structure
 - [x] Setup persistent storage and backup solution for k8s clusters with [volsync](https://volsync.readthedocs.io/en/stable/)
 - [x] Setup Flux for in-cluster GitOps reconciliation (replace local `kustomize --enable-helm` applies)
-- [ ] Take inventory of lab hardware
+- [x] Take inventory of lab hardware
 - [ ] Take inventory of existing snowflake nodes in Lab
 - [ ] Create k8s cluster in Lab
 - [ ] Migrate snowflake services to cluster

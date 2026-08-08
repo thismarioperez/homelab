@@ -104,7 +104,7 @@ each cluster in this repo. Updated whenever VM counts/sizes change.
 
 ## testlab
 
-Runs entirely on the single [testlab host](hardware.md#testlab-host) (Intel
+Runs entirely on the single [testlab host](hardware/README.md#testlab-host) (Intel
 NUC6i5SYH, 2 cores / 4 threads, 32GB RAM, 1TB ZFS-backed `storage`
 datastore, thick-provisioned). Its purpose is to validate the MetalLB +
 Traefik Gateway API + Talos VIP pattern — stable, reserved IPs for both the
