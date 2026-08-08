@@ -278,7 +278,7 @@ env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = "./scripts/volsync-backup-all.sh"
 
 [tasks."volsync:testlab:restore"]
-description = "trigger a volsync restore for an app in testlab — requires a ReplicationDestination named <app>-dst (not yet wired up in kubernetes/testlab/components/volsync/)"
+description = "trigger a volsync restore for an app in testlab, e.g. mise run volsync:testlab:restore -- pihole default restore1 [timestamp] — requires a ReplicationDestination named <app>-dst (not yet wired up in kubernetes/testlab/components/volsync/)"
 env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
 run = "./scripts/volsync-restore.sh"
 

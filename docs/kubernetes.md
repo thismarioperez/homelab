@@ -182,6 +182,6 @@ backed by a NAS rather than the worker's local disk.
 
 ## lab
 
-Not yet implemented — see the [README goals](../README.md#goals). This
+Not yet implemented — see the [README TODO](../README.md#todo). This
 section will be filled in once the production cluster's host(s) and VM
 topology are defined.

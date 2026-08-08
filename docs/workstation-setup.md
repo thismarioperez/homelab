@@ -15,7 +15,7 @@ cd homelab
 mise install
 ```
 
-This installs `opentofu` and the `op` CLI as pinned in `mise.toml`.
+This installs the CLI tools this repo depends on (opentofu, kubectl, talosctl, ansible, flux2, helm, the `op` CLI, and more) as pinned in `mise.toml`.
 
 ## 2. Configure 1Password auth
 
@@ -54,15 +54,16 @@ mise run ansible:install-collections
 mise run ssh:add-key
 ```
 
-`ansible/playbooks/group_vars/all.yml` resolves `ansible_user` via the
+`ansible/inventory/group_vars/all.yml` resolves `ansible_user` via the
 `community.general.onepassword` lookup plugin, using the same
 `OP_SERVICE_ACCOUNT_TOKEN` from step 2 — no separate setup needed.
 
-Inventory is read live from `tofu/testlab`'s state via the
+Inventory is read live from tofu state via the
 `cloud.terraform.terraform_provider` plugin (`ansible/inventory/tofu_state.yml`)
-— no static inventory to keep in sync. It requires `tofu/testlab` to already
-be initialized (step 3) and applied, since it reads the `ansible_host`
-resources declared in `tofu/testlab/main.tf`:
+— no static inventory to keep in sync. It resolves whatever `ansible_host`
+outputs exist in the tofu project's state. Today that's empty for
+`tofu/testlab` (it runs Talos, which has no ansible-managed hosts) — these
+commands are kept for any future Ubuntu-based project:
 
 ```bash
 mise run ansible:testlab:inventory   # sanity check: ansible-inventory --graph
