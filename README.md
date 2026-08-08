@@ -17,12 +17,12 @@ provisioned with OpenTofu, configured with Ansible.
 
 ## TODO
 
-- [x] Finish testlab k3s cluster
-- [x] Setup HA testlab k3s cluster
+- [x] Finish testlab k8s cluster
+- [x] Setup HA testlab k8s cluster
 - [x] Improve `testlab` tofu project structure
-- [x] Setup persistent storage and backup solution for k3s clusters with [volsync](https://volsync.readthedocs.io/en/stable/)
+- [x] Setup persistent storage and backup solution for k8s clusters with [volsync](https://volsync.readthedocs.io/en/stable/)
 - [x] Setup Flux for in-cluster GitOps reconciliation (replace local `kustomize --enable-helm` applies)
 - [ ] Take inventory of existing snowflake nodes in Lab
-- [ ] Create K3s cluster in Lab
+- [ ] Create k8s cluster in Lab
 - [ ] Migrate snowflake services to cluster
 - [ ] De-provision old snowflake nodes
