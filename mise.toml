@@ -2,23 +2,37 @@
 _.file = ".env"
 
 [tools]
-opentofu = "1.12"
+# runtimes
 node = "lts"
+
+# infra provisioning
+opentofu = "1.12"
+talosctl = "latest"
+
+# kubernetes
 kubectl = "1.36"
 kubeconform = "latest"
-talosctl = "latest"
 helm = "3"
 helmfile = "latest"
 flux2 = "latest"
-yq = "latest"
+k9s = "latest"
+
+# secrets
 1password-cli = "latest"
+
+# ansible
 python = "3"
 pipx = "latest"
 "pipx:ansible" = { version = "14", pipx_args = "--include-deps" }
 "pipx:ansible-lint" = "26"
+
+# misc
+yq = "latest"
+
+# formatting
 "npm:prettier" = "latest"
 "aqua:pre-commit/pre-commit" = "latest"
-k9s = "latest"
+shellcheck = "latest"
 
 [tasks."op:whoami"]
 description = "test that OP_SERVICE_ACCOUNT_TOKEN auth works"
