@@ -77,11 +77,10 @@ upgrades to Flux itself also flow through git instead of a manual
 cluster where Flux itself is broken.
 
 Talos ships no Traefik, no `local-path-provisioner`, and no default
-CNI-agnostic Gateway API implementation the way k3s did — Flux installs
-`traefik` and `local-path-provisioner` as first-class `HelmRelease`s (see
-`kubernetes/testlab/apps/kube-system/`) to replace those former k3s
-built-ins. Talos deploys its default Flannel CNI automatically; this repo
-doesn't override that choice for `testlab`.
+CNI-agnostic Gateway API implementation — Flux installs `traefik` and
+`local-path-provisioner` as first-class `HelmRelease`s (see
+`kubernetes/testlab/apps/kube-system/`). Talos deploys its default Flannel
+CNI automatically; this repo doesn't override that choice for `testlab`.
 
 ### 4. Verify
 
@@ -115,15 +114,12 @@ pattern into `lab`. It does not test HA failover behavior; a single
 controller and single worker are enough to prove the pattern, and real
 multi-controller HA will be exercised on `lab` instead.
 
-testlab originally ran k3s, installed via Ansible. It was rebuilt from
-scratch (destroy + recreate, not an in-place upgrade — none exists between
-k3s and Talos) onto Talos Linux, provisioned entirely by OpenTofu via the
+testlab runs on Talos Linux, provisioned entirely by OpenTofu via the
 [`siderolabs/talos`](https://registry.terraform.io/providers/siderolabs/talos/latest)
-provider (`tofu/testlab/talos.tf`). VM provisioning uses a new
-`tofu/modules/talos-vm` module, mirroring the existing `tofu/modules/ubuntu-vm`
+provider (`tofu/testlab/talos.tf`). VM provisioning uses the
+`tofu/modules/talos-vm` module, mirroring the `tofu/modules/ubuntu-vm`
 module's shape but without any cloud-init/SSH concepts. `ansible/` remains
-in the repo for any future Ubuntu-VM use; only its k3s/kube-vip-specific
-playbooks were removed.
+in the repo for any future Ubuntu-VM use.
 
 ### Host RAM budget (32GB)
 
@@ -171,9 +167,8 @@ where Traefik, MetalLB's speaker, and test workloads actually run.
 
 ### Persistent storage
 
-`local-path-provisioner` (a Flux `HelmRelease`, replacing what k3s used to
-bundle by default) is the default StorageClass for general-purpose PVCs,
-backed by the worker's local disk.
+`local-path-provisioner` (a Flux `HelmRelease`) is the default StorageClass
+for general-purpose PVCs, backed by the worker's local disk.
 
 A separate `nfs.csi.k8s.io` StorageClass (`nfs-backups`, non-default,
 `kubernetes/testlab/apps/storage-system/csi-driver-nfs`) is reserved for

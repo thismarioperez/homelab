@@ -20,9 +20,8 @@ spec:
         name: traefik
 
   values:
-    # Mirrors the values k3s's bundled Traefik previously got via the
-    # k3s-only HelmChartConfig CRD (see ../../gateway, which depends on
-    # this GatewayClass existing).
+    # Enables the Gateway API GatewayClass (see ../../gateway, which depends
+    # on this GatewayClass existing).
     providers:
       kubernetesGateway:
         enabled: true

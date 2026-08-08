@@ -13,7 +13,7 @@ provisioned with OpenTofu, configured with Ansible.
   exploring the OPNsense router's REST API
 - [Hardware](docs/hardware.md) — physical devices in the lab
 - [Kubernetes](docs/kubernetes.md) — cluster standup steps and resource
-  distribution across k3s cluster VMs
+  distribution across cluster VMs
 
 ## TODO
 

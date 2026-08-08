@@ -20,7 +20,6 @@ spec:
         name: local-path-provisioner
 
   values:
-    # Replaces k3s's bundled local-path-provisioner as the default
-    # general-purpose StorageClass (Talos ships no default StorageClass).
+    # Default general-purpose StorageClass (Talos ships no default StorageClass).
     storageClass:
       defaultClass: true

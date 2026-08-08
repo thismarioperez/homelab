@@ -98,7 +98,7 @@ variable "talos_version" {
 
 variable "kubernetes_version" {
   type        = string
-  description = "Kubernetes version to provision — versioned independently of talos_version, unlike k3s where they're the same artifact"
+  description = "Kubernetes version to provision — versioned independently of talos_version"
   default     = "1.34.0"
 }
 
