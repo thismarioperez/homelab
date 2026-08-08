@@ -22,7 +22,7 @@ Physical devices in the lab.
 | Storage | 4x 6 TB HDD     |
 | OS      | Synology DSM 7  |
 
-## Testlab host
+## Testlab host (ryujin)
 
 |          |                                       |
 | -------- | ------------------------------------- |
