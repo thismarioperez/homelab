@@ -22,7 +22,9 @@ provisioned with OpenTofu, configured with Ansible.
 - [x] Improve `testlab` tofu project structure
 - [x] Setup persistent storage and backup solution for k8s clusters with [volsync](https://volsync.readthedocs.io/en/stable/)
 - [x] Setup Flux for in-cluster GitOps reconciliation (replace local `kustomize --enable-helm` applies)
+- [ ] Take inventory of lab hardware
 - [ ] Take inventory of existing snowflake nodes in Lab
 - [ ] Create k8s cluster in Lab
 - [ ] Migrate snowflake services to cluster
 - [ ] De-provision old snowflake nodes
+- [ ] Add [RackPeek](https://github.com/timmoth/rackpeek) to services
