@@ -322,7 +322,7 @@ spec:
             environment: production
   template:
     metadata:
-      name: "myapp-{{name}}"
+      name: 'myapp-{{name}}'
     spec:
       project: default
       source:
@@ -330,7 +330,7 @@ spec:
         targetRevision: main
         path: overlays/production
       destination:
-        server: "{{server}}"
+        server: '{{server}}'
         namespace: production
       syncPolicy:
         automated:
@@ -371,7 +371,7 @@ spec:
     storageLocation: default
     volumeSnapshotLocations:
       - default
-    ttl: 720h # 30 days
+    ttl: 720h  # 30 days
 ---
 # Restore to different cluster
 apiVersion: velero.io/v1

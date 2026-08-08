@@ -4,3 +4,4 @@ kubernetes/**/charts/
 tofu/testlab/.cache/
 ansible/.cache/
 .claude/
+.agents/skills/

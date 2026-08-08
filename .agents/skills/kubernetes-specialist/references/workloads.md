@@ -38,61 +38,61 @@ spec:
         runAsUser: 1000
         fsGroup: 2000
       containers:
-        - name: app
-          image: myregistry.io/web-app:v1.2.0
-          imagePullPolicy: IfNotPresent
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          env:
-            - name: ENVIRONMENT
-              value: production
-            - name: DB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: database.host
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: db-password
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: http
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 2
-          volumeMounts:
-            - name: config
-              mountPath: /etc/config
-              readOnly: true
-            - name: cache
-              mountPath: /var/cache
-      volumes:
+      - name: app
+        image: myregistry.io/web-app:v1.2.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: ENVIRONMENT
+          value: production
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database.host
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: db-password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
         - name: config
-          configMap:
-            name: app-config
+          mountPath: /etc/config
+          readOnly: true
         - name: cache
-          emptyDir: {}
+          mountPath: /var/cache
+      volumes:
+      - name: config
+        configMap:
+          name: app-config
+      - name: cache
+        emptyDir: {}
 ```
 
 ## StatefulSet Pattern
@@ -122,54 +122,54 @@ spec:
         runAsUser: 999
         fsGroup: 999
       containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
         - name: postgres
-          image: postgres:15-alpine
-          ports:
-            - name: postgres
-              containerPort: 5432
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secrets
-                  key: password
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          resources:
-            requests:
-              cpu: 500m
-              memory: 1Gi
-            limits:
-              cpu: 2000m
-              memory: 4Gi
-          volumeMounts:
-            - name: data
-              mountPath: /var/lib/postgresql/data
-          livenessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - postgres
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - postgres
-            initialDelaySeconds: 10
-            periodSeconds: 5
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: fast-ssd
+          containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         resources:
           requests:
-            storage: 50Gi
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 10
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: fast-ssd
+      resources:
+        requests:
+          storage: 50Gi
 ```
 
 ## DaemonSet Pattern
@@ -197,40 +197,40 @@ spec:
       hostPID: true
       serviceAccountName: node-exporter-sa
       tolerations:
-        - effect: NoSchedule
-          operator: Exists
+      - effect: NoSchedule
+        operator: Exists
       containers:
-        - name: node-exporter
-          image: prom/node-exporter:latest
-          args:
-            - --path.procfs=/host/proc
-            - --path.sysfs=/host/sys
-            - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
-          ports:
-            - name: metrics
-              containerPort: 9100
-              protocol: TCP
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 128Mi
-          volumeMounts:
-            - name: proc
-              mountPath: /host/proc
-              readOnly: true
-            - name: sys
-              mountPath: /host/sys
-              readOnly: true
-      volumes:
+      - name: node-exporter
+        image: prom/node-exporter:latest
+        args:
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+        ports:
+        - name: metrics
+          containerPort: 9100
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        volumeMounts:
         - name: proc
-          hostPath:
-            path: /proc
+          mountPath: /host/proc
+          readOnly: true
         - name: sys
-          hostPath:
-            path: /sys
+          mountPath: /host/sys
+          readOnly: true
+      volumes:
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: sys
+        hostPath:
+          path: /sys
 ```
 
 ## Job Pattern
@@ -252,27 +252,27 @@ spec:
       restartPolicy: OnFailure
       serviceAccountName: migration-sa
       containers:
-        - name: migrate
-          image: myregistry.io/migrations:v1.2.0
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              echo "Starting migration..."
-              /app/migrate up
-              echo "Migration complete"
-          env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: db-secrets
-                  key: connection-string
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
+      - name: migrate
+        image: myregistry.io/migrations:v1.2.0
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Starting migration..."
+          /app/migrate up
+          echo "Migration complete"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: connection-string
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
 ```
 
 ## CronJob Pattern
@@ -284,7 +284,7 @@ metadata:
   name: backup-database
   namespace: production
 spec:
-  schedule: "0 2 * * *" # Daily at 2 AM
+  schedule: "0 2 * * *"  # Daily at 2 AM
   timeZone: "America/New_York"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
@@ -301,39 +301,39 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: backup-sa
           containers:
-            - name: backup
-              image: myregistry.io/backup-tool:latest
-              command: ["/usr/local/bin/backup.sh"]
-              env:
-                - name: S3_BUCKET
-                  valueFrom:
-                    configMapKeyRef:
-                      name: backup-config
-                      key: s3-bucket
-                - name: AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: backup-secrets
-                      key: aws-access-key
-                - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: backup-secrets
-                      key: aws-secret-key
-              resources:
-                requests:
-                  cpu: 200m
-                  memory: 256Mi
-                limits:
-                  cpu: 1000m
-                  memory: 1Gi
-              volumeMounts:
-                - name: backup-volume
-                  mountPath: /backup
-          volumes:
+          - name: backup
+            image: myregistry.io/backup-tool:latest
+            command: ["/usr/local/bin/backup.sh"]
+            env:
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: s3-bucket
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backup-secrets
+                  key: aws-access-key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-secrets
+                  key: aws-secret-key
+            resources:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+              limits:
+                cpu: 1000m
+                memory: 1Gi
+            volumeMounts:
             - name: backup-volume
-              emptyDir:
-                sizeLimit: 10Gi
+              mountPath: /backup
+          volumes:
+          - name: backup-volume
+            emptyDir:
+              sizeLimit: 10Gi
 ```
 
 ## Init Containers
@@ -341,28 +341,28 @@ spec:
 ```yaml
 spec:
   initContainers:
-    - name: wait-for-db
-      image: busybox:latest
-      command: ["sh", "-c"]
-      args:
-        - |
-          until nc -z postgres-service 5432; do
-            echo "Waiting for database..."
-            sleep 2
-          done
-          echo "Database is ready"
-    - name: migrate-schema
-      image: myregistry.io/migrations:latest
-      command: ["/app/migrate", "up"]
-      env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-secrets
-              key: url
+  - name: wait-for-db
+    image: busybox:latest
+    command: ['sh', '-c']
+    args:
+    - |
+      until nc -z postgres-service 5432; do
+        echo "Waiting for database..."
+        sleep 2
+      done
+      echo "Database is ready"
+  - name: migrate-schema
+    image: myregistry.io/migrations:latest
+    command: ["/app/migrate", "up"]
+    env:
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: db-secrets
+          key: url
   containers:
-    - name: app
-      image: myregistry.io/app:latest
+  - name: app
+    image: myregistry.io/app:latest
 ```
 
 ## Best Practices

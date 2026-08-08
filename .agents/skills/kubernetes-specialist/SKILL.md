@@ -37,24 +37,23 @@ metadata:
 
 Load detailed guidance based on context:
 
-| Topic             | Reference                         | Load When                                                        |
-| ----------------- | --------------------------------- | ---------------------------------------------------------------- |
-| Workloads         | `references/workloads.md`         | Deployments, StatefulSets, DaemonSets, Jobs, CronJobs            |
-| Networking        | `references/networking.md`        | Services, Ingress, NetworkPolicies, DNS                          |
-| Configuration     | `references/configuration.md`     | ConfigMaps, Secrets, environment variables                       |
-| Storage           | `references/storage.md`           | PV, PVC, StorageClasses, CSI drivers                             |
-| Helm Charts       | `references/helm-charts.md`       | Chart structure, values, templates, hooks, testing, repositories |
-| Troubleshooting   | `references/troubleshooting.md`   | kubectl debug, logs, events, common issues                       |
-| Custom Operators  | `references/custom-operators.md`  | CRD, Operator SDK, controller-runtime, reconciliation            |
-| Service Mesh      | `references/service-mesh.md`      | Istio, Linkerd, traffic management, mTLS, canary                 |
-| GitOps            | `references/gitops.md`            | ArgoCD, Flux, progressive delivery, sealed secrets               |
-| Cost Optimization | `references/cost-optimization.md` | VPA, HPA tuning, spot instances, quotas, right-sizing            |
-| Multi-Cluster     | `references/multi-cluster.md`     | Cluster API, federation, cross-cluster networking, DR            |
+| Topic | Reference | Load When |
+|-------|-----------|-----------|
+| Workloads | `references/workloads.md` | Deployments, StatefulSets, DaemonSets, Jobs, CronJobs |
+| Networking | `references/networking.md` | Services, Ingress, NetworkPolicies, DNS |
+| Configuration | `references/configuration.md` | ConfigMaps, Secrets, environment variables |
+| Storage | `references/storage.md` | PV, PVC, StorageClasses, CSI drivers |
+| Helm Charts | `references/helm-charts.md` | Chart structure, values, templates, hooks, testing, repositories |
+| Troubleshooting | `references/troubleshooting.md` | kubectl debug, logs, events, common issues |
+| Custom Operators | `references/custom-operators.md` | CRD, Operator SDK, controller-runtime, reconciliation |
+| Service Mesh | `references/service-mesh.md` | Istio, Linkerd, traffic management, mTLS, canary |
+| GitOps | `references/gitops.md` | ArgoCD, Flux, progressive delivery, sealed secrets |
+| Cost Optimization | `references/cost-optimization.md` | VPA, HPA tuning, spot instances, quotas, right-sizing |
+| Multi-Cluster | `references/multi-cluster.md` | Cluster API, federation, cross-cluster networking, DR |
 
 ## Constraints
 
 ### MUST DO
-
 - Use declarative YAML manifests (avoid imperative kubectl commands)
 - Set resource requests and limits on all containers
 - Include liveness and readiness probes
@@ -66,7 +65,6 @@ Load detailed guidance based on context:
 - Document configuration decisions in annotations
 
 ### MUST NOT DO
-
 - Deploy to production without resource limits
 - Store secrets in ConfigMaps or as plain environment variables
 - Use default ServiceAccount for application pods
@@ -100,14 +98,14 @@ spec:
         app: my-app
         version: "1.2.3"
     spec:
-      serviceAccountName: my-app-sa # never use default SA
+      serviceAccountName: my-app-sa   # never use default SA
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 2000
       containers:
         - name: my-app
-          image: my-registry/my-app:1.2.3 # never use latest
+          image: my-registry/my-app:1.2.3   # never use latest
           ports:
             - containerPort: 8080
           resources:
@@ -136,7 +134,7 @@ spec:
               drop: ["ALL"]
           envFrom:
             - secretRef:
-                name: my-app-secret # pull credentials from Secret, not ConfigMap
+                name: my-app-secret   # pull credentials from Secret, not ConfigMap
 ```
 
 ### Minimal RBAC (least privilege)
@@ -156,7 +154,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
-    verbs: ["get", "list"] # grant only what is needed
+    verbs: ["get", "list"]   # grant only what is needed
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -237,7 +235,6 @@ kubectl rollout undo deployment/my-app -n my-namespace
 ## Output Templates
 
 When implementing Kubernetes resources, provide:
-
 1. Complete YAML manifests with proper structure
 2. RBAC configuration if needed (ServiceAccount, Role, RoleBinding)
 3. NetworkPolicy for network isolation

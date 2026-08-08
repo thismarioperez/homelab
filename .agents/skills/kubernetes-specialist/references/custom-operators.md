@@ -43,7 +43,7 @@ spec:
                   type: string
                 storage:
                   type: string
-                  pattern: "^[0-9]+Gi$"
+                  pattern: '^[0-9]+Gi$'
                 replicas:
                   type: integer
                   minimum: 1

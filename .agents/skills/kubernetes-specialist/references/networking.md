@@ -18,14 +18,14 @@ spec:
     app: web-app
     tier: frontend
   ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-      protocol: TCP
-    - name: metrics
-      port: 9090
-      targetPort: metrics
-      protocol: TCP
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
@@ -41,13 +41,13 @@ metadata:
   name: postgres-headless
   namespace: database
 spec:
-  clusterIP: None # Headless
+  clusterIP: None  # Headless
   selector:
     app: postgres
   ports:
-    - name: postgres
-      port: 5432
-      targetPort: 5432
+  - name: postgres
+    port: 5432
+    targetPort: 5432
 ```
 
 ### NodePort
@@ -63,11 +63,11 @@ spec:
   selector:
     app: external-app
   ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-      nodePort: 30080 # Range: 30000-32767
-      protocol: TCP
+  - name: http
+    port: 80
+    targetPort: 8080
+    nodePort: 30080  # Range: 30000-32767
+    protocol: TCP
 ```
 
 ### LoadBalancer
@@ -86,14 +86,14 @@ spec:
   selector:
     app: web-app
   ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-    - name: https
-      port: 443
-      targetPort: 8443
+  - name: http
+    port: 80
+    targetPort: 8080
+  - name: https
+    port: 443
+    targetPort: 8443
   loadBalancerSourceRanges:
-    - 203.0.113.0/24 # Restrict source IPs
+  - 203.0.113.0/24  # Restrict source IPs
 ```
 
 ## Ingress Resources
@@ -116,38 +116,38 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-    - hosts:
-        - www.example.com
-        - api.example.com
-      secretName: example-tls
+  - hosts:
+    - www.example.com
+    - api.example.com
+    secretName: example-tls
   rules:
-    - host: www.example.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend-service
-                port:
-                  number: 80
-    - host: api.example.com
-      http:
-        paths:
-          - path: /v1
-            pathType: Prefix
-            backend:
-              service:
-                name: api-service
-                port:
-                  number: 8080
-          - path: /v2
-            pathType: Prefix
-            backend:
-              service:
-                name: api-v2-service
-                port:
-                  number: 8080
+  - host: www.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  - host: api.example.com
+    http:
+      paths:
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 8080
+      - path: /v2
+        pathType: Prefix
+        backend:
+          service:
+            name: api-v2-service
+            port:
+              number: 8080
 ```
 
 ### Path-Based Routing
@@ -161,23 +161,23 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: app.example.com
-      http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: backend-api
-                port:
-                  number: 8080
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 80
+  - host: app.example.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-api
+            port:
+              number: 8080
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
 ```
 
 ## NetworkPolicy (Zero Trust)
@@ -193,8 +193,8 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-    - Ingress
-    - Egress
+  - Ingress
+  - Egress
 ```
 
 ### Allow Frontend to Backend
@@ -210,15 +210,15 @@ spec:
     matchLabels:
       tier: backend
   policyTypes:
-    - Ingress
+  - Ingress
   ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              tier: frontend
-      ports:
-        - protocol: TCP
-          port: 8080
+  - from:
+    - podSelector:
+        matchLabels:
+          tier: frontend
+    ports:
+    - protocol: TCP
+      port: 8080
 ```
 
 ### Backend to Database
@@ -234,18 +234,18 @@ spec:
     matchLabels:
       app: postgres
   policyTypes:
-    - Ingress
+  - Ingress
   ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              tier: backend
-        - namespaceSelector:
-            matchLabels:
-              name: production
-      ports:
-        - protocol: TCP
-          port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          tier: backend
+    - namespaceSelector:
+        matchLabels:
+          name: production
+    ports:
+    - protocol: TCP
+      port: 5432
 ```
 
 ### Allow DNS and External HTTPS
@@ -261,20 +261,20 @@ spec:
     matchLabels:
       tier: backend
   policyTypes:
-    - Egress
+  - Egress
   egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - protocol: TCP
-          port: 443
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
 ```
 
 ### Cross-Namespace Communication
@@ -290,18 +290,18 @@ spec:
     matchLabels:
       app: web-app
   policyTypes:
-    - Ingress
+  - Ingress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: monitoring
-          podSelector:
-            matchLabels:
-              app: prometheus
-      ports:
-        - protocol: TCP
-          port: 8080
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+      podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 8080
 ```
 
 ## DNS Configuration
@@ -332,18 +332,18 @@ spec:
   dnsPolicy: None
   dnsConfig:
     nameservers:
-      - 8.8.8.8
-      - 8.8.4.4
+    - 8.8.8.8
+    - 8.8.4.4
     searches:
-      - production.svc.cluster.local
-      - svc.cluster.local
-      - cluster.local
+    - production.svc.cluster.local
+    - svc.cluster.local
+    - cluster.local
     options:
-      - name: ndots
-        value: "2"
+    - name: ndots
+      value: "2"
   containers:
-    - name: app
-      image: myapp:latest
+  - name: app
+    image: myapp:latest
 ```
 
 ## Service Mesh (Istio Example)
@@ -358,25 +358,25 @@ metadata:
   namespace: production
 spec:
   hosts:
-    - web-app-service
+  - web-app-service
   http:
-    - match:
-        - headers:
-            canary:
-              exact: "true"
-      route:
-        - destination:
-            host: web-app-service
-            subset: v2
-    - route:
-        - destination:
-            host: web-app-service
-            subset: v1
-          weight: 90
-        - destination:
-            host: web-app-service
-            subset: v2
-          weight: 10
+  - match:
+    - headers:
+        canary:
+          exact: "true"
+    route:
+    - destination:
+        host: web-app-service
+        subset: v2
+  - route:
+    - destination:
+        host: web-app-service
+        subset: v1
+      weight: 90
+    - destination:
+        host: web-app-service
+        subset: v2
+      weight: 10
 ```
 
 ### DestinationRule
@@ -399,12 +399,12 @@ spec:
     loadBalancer:
       simple: LEAST_REQUEST
   subsets:
-    - name: v1
-      labels:
-        version: v1.0.0
-    - name: v2
-      labels:
-        version: v2.0.0
+  - name: v1
+    labels:
+      version: v1.0.0
+  - name: v2
+    labels:
+      version: v2.0.0
 ```
 
 ## EndpointSlice (Modern Alternative to Endpoints)
@@ -419,20 +419,20 @@ metadata:
     kubernetes.io/service-name: web-app-service
 addressType: IPv4
 ports:
-  - name: http
-    protocol: TCP
-    port: 8080
+- name: http
+  protocol: TCP
+  port: 8080
 endpoints:
-  - addresses:
-      - "10.244.1.5"
-    conditions:
-      ready: true
-    nodeName: node-1
-  - addresses:
-      - "10.244.2.7"
-    conditions:
-      ready: true
-    nodeName: node-2
+- addresses:
+  - "10.244.1.5"
+  conditions:
+    ready: true
+  nodeName: node-1
+- addresses:
+  - "10.244.2.7"
+  conditions:
+    ready: true
+  nodeName: node-2
 ```
 
 ## Best Practices

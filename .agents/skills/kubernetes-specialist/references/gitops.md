@@ -94,16 +94,16 @@ spec:
             revision: main
   template:
     metadata:
-      name: "myapp-{{cluster}}"
+      name: 'myapp-{{cluster}}'
     spec:
       project: default
       source:
         repoURL: https://github.com/myorg/myapp-manifests.git
-        targetRevision: "{{revision}}"
-        path: "overlays/{{cluster}}"
+        targetRevision: '{{revision}}'
+        path: 'overlays/{{cluster}}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: '{{namespace}}'
       syncPolicy:
         automated:
           prune: true
@@ -151,20 +151,20 @@ metadata:
 spec:
   description: Production applications
   sourceRepos:
-    - "https://github.com/myorg/*"
-    - "https://charts.example.com"
+    - 'https://github.com/myorg/*'
+    - 'https://charts.example.com'
   destinations:
     - namespace: production
       server: https://kubernetes.default.svc
     - namespace: production-*
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-    - group: ""
+    - group: ''
       kind: Namespace
   namespaceResourceBlacklist:
-    - group: ""
+    - group: ''
       kind: ResourceQuota
-    - group: ""
+    - group: ''
       kind: LimitRange
   roles:
     - name: developer
@@ -275,7 +275,7 @@ spec:
   chart:
     spec:
       chart: redis
-      version: "17.x"
+      version: '17.x'
       sourceRef:
         kind: HelmRepository
         name: bitnami
@@ -314,7 +314,7 @@ spec:
     name: myapp
   policy:
     semver:
-      range: ">=1.0.0"
+      range: '>=1.0.0'
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta1
 kind: ImageUpdateAutomation
@@ -334,7 +334,7 @@ spec:
       author:
         email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
-      messageTemplate: "Update image to {{.NewTag}}"
+      messageTemplate: 'Update image to {{.NewTag}}'
     push:
       branch: main
   update:
@@ -347,6 +347,7 @@ spec:
 ```yaml
 # Install Flagger
 kubectl apply -k github.com/fluxcd/flagger/kustomize/istio
+
 ---
 apiVersion: flagger.app/v1beta1
 kind: Canary
@@ -469,7 +470,6 @@ spec:
 ## Repository Strategies
 
 ### Mono-repo
-
 ```
 fleet-repo/
 ├── apps/
@@ -487,7 +487,6 @@ fleet-repo/
 ```
 
 ### Multi-repo
-
 ```
 # App repos (one per app)
 myapp-manifests/
@@ -507,15 +506,15 @@ fleet-infra/
 
 ## ArgoCD vs Flux Comparison
 
-| Feature          | ArgoCD               | Flux                       |
-| ---------------- | -------------------- | -------------------------- |
-| UI               | Built-in web UI      | Third-party (Weave GitOps) |
-| Multi-tenancy    | AppProject           | Namespaced resources       |
-| Helm             | Native support       | HelmController             |
-| Image automation | ArgoCD Image Updater | Native ImagePolicy         |
-| Notifications    | ArgoCD Notifications | Alerts/Receivers           |
-| RBAC             | Built-in             | Kubernetes RBAC            |
-| Architecture     | Centralized          | Distributed                |
+| Feature | ArgoCD | Flux |
+|---------|--------|------|
+| UI | Built-in web UI | Third-party (Weave GitOps) |
+| Multi-tenancy | AppProject | Namespaced resources |
+| Helm | Native support | HelmController |
+| Image automation | ArgoCD Image Updater | Native ImagePolicy |
+| Notifications | ArgoCD Notifications | Alerts/Receivers |
+| RBAC | Built-in | Kubernetes RBAC |
+| Architecture | Centralized | Distributed |
 
 ## Best Practices
 

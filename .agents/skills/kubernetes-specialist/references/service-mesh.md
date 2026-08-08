@@ -53,8 +53,8 @@ spec:
     - myapp
     - myapp.example.com
   gateways:
-    - mesh # Internal mesh traffic
-    - myapp-gateway # External gateway
+    - mesh                    # Internal mesh traffic
+    - myapp-gateway           # External gateway
   http:
     # Route based on headers
     - match:
@@ -209,7 +209,7 @@ spec:
     matchLabels:
       app: legacy-service
   mtls:
-    mode: PERMISSIVE # Allow both mTLS and plaintext
+    mode: PERMISSIVE  # Allow both mTLS and plaintext
 ---
 # Mesh-wide mTLS policy
 apiVersion: security.istio.io/v1beta1
@@ -388,9 +388,9 @@ spec:
   service: myapp
   backends:
     - service: myapp-v1
-      weight: 900m # 90%
+      weight: 900m    # 90%
     - service: myapp-v2
-      weight: 100m # 10%
+      weight: 100m    # 10%
 ```
 
 ## Multi-Cluster Mesh (Istio)
@@ -435,15 +435,15 @@ istioctl dashboard jaeger
 
 ## Service Mesh Comparison
 
-| Feature            | Istio          | Linkerd               |
-| ------------------ | -------------- | --------------------- |
-| Sidecar            | Envoy          | linkerd2-proxy (Rust) |
-| Resource usage     | Higher         | Lower                 |
-| Features           | More extensive | Focused/simpler       |
-| mTLS               | Built-in       | Built-in              |
-| Traffic management | Advanced       | Basic (SMI)           |
-| Multi-cluster      | Native support | Requires setup        |
-| Learning curve     | Steeper        | Gentler               |
+| Feature | Istio | Linkerd |
+|---------|-------|---------|
+| Sidecar | Envoy | linkerd2-proxy (Rust) |
+| Resource usage | Higher | Lower |
+| Features | More extensive | Focused/simpler |
+| mTLS | Built-in | Built-in |
+| Traffic management | Advanced | Basic (SMI) |
+| Multi-cluster | Native support | Requires setup |
+| Learning curve | Steeper | Gentler |
 
 ## Best Practices
 

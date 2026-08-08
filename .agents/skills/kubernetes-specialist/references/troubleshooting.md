@@ -350,9 +350,9 @@ metadata:
   namespace: production
 spec:
   containers:
-    - name: netshoot
-      image: nicolaka/netshoot:latest
-      command: ["/bin/sleep", "3600"]
+  - name: netshoot
+    image: nicolaka/netshoot:latest
+    command: ["/bin/sleep", "3600"]
   restartPolicy: Never
 ```
 
@@ -366,26 +366,25 @@ metadata:
   namespace: production
 spec:
   containers:
-    - name: postgres
-      image: postgres:15-alpine
-      command: ["/bin/sleep", "3600"]
-      env:
-        - name: PGHOST
-          value: postgres-service
-        - name: PGUSER
-          value: myapp
-        - name: PGPASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secrets
-              key: password
+  - name: postgres
+    image: postgres:15-alpine
+    command: ["/bin/sleep", "3600"]
+    env:
+    - name: PGHOST
+      value: postgres-service
+    - name: PGUSER
+      value: myapp
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-secrets
+          key: password
   restartPolicy: Never
 ```
 
 ## Quick Reference
 
 ### Pod States
-
 - **Pending**: Waiting to be scheduled
 - **ContainerCreating**: Pulling image / creating container
 - **Running**: Pod is running
@@ -397,7 +396,6 @@ spec:
 - **Unknown**: Cannot get pod status
 
 ### Common Exit Codes
-
 - **0**: Success
 - **1**: General error
 - **137**: SIGKILL (OOMKilled - out of memory)

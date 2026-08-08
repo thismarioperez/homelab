@@ -371,7 +371,7 @@ metadata:
   name: scale-down-dev
   namespace: development
 spec:
-  schedule: "0 20 * * 1-5" # 8 PM Mon-Fri
+  schedule: "0 20 * * 1-5"  # 8 PM Mon-Fri
   jobTemplate:
     spec:
       template:
@@ -393,7 +393,7 @@ metadata:
   name: scale-up-dev
   namespace: development
 spec:
-  schedule: "0 8 * * 1-5" # 8 AM Mon-Fri
+  schedule: "0 8 * * 1-5"  # 8 AM Mon-Fri
   jobTemplate:
     spec:
       template:
