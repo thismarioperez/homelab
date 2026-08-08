@@ -154,7 +154,12 @@ run = "tofu plan"
 [tasks."tofu:lab:apply"]
 description = "tofu apply for tofu/lab"
 dir = "{{config_root}}/tofu/lab"
-run = "tofu apply"
+run = "tofu apply -auto-approve"
+
+[tasks."tofu:lab:destroy"]
+description = "tofu apply for tofu/lab"
+dir = "{{config_root}}/tofu/lab"
+run = "tofu apply -destroy"
 
 [tasks."tofu:lab:validate"]
 description = "validate tofu/lab config"
@@ -193,6 +198,30 @@ description = "tofu apply for tofu/testlab"
 dir = "{{config_root}}/tofu/testlab"
 env = { _.file = "{{config_root}}/tofu/testlab/.env" }
 run = "tofu apply"
+
+[tasks."tofu:testlab:clear-leases"]
+description = "clear stale OPNsense/Kea DHCP leases for testlab's statically-provisioned IPs (Kea doesn't release a lease just because its reservation was destroyed — see tofu/testlab/main.tf)"
+dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
+run = [
+  '''
+  OPNSENSE_URL=$(grep -E '^opnsense_endpoint' terraform.tfvars | cut -d'"' -f2) \
+  OPNSENSE_ALLOW_INSECURE=$(grep -E '^opnsense_allow_insecure' terraform.tfvars | awk '{print $NF}') \
+  OPNSENSE_USERNAME=$(op item get 'OPNsense- tofu' --vault 'Home Network' --fields label=username --reveal) \
+  OPNSENSE_PASSWORD=$(op item get 'OPNsense- tofu' --vault 'Home Network' --fields label=password --reveal) \
+  ./scripts/clear-dhcp-leases.sh \
+    $(tofu output -raw talos_apiserver_vip) \
+    $(tofu output -raw k8s_lb_ip) \
+    $(tofu output -json vm_network_info | jq -r '.[].ip_address')
+  ''',
+]
+
+[tasks."tofu:testlab:destroy"]
+description = "clear stale DHCP leases for testlab's static IPs, then tofu destroy tofu/testlab"
+dir = "{{config_root}}/tofu/testlab"
+env = { _.file = "{{config_root}}/tofu/testlab/.env" }
+depends = ["tofu:testlab:clear-leases"]
+run = "tofu apply -destroy -auto-approve"
 
 [tasks."tofu:testlab:validate"]
 description = "validate tofu/testlab config"
