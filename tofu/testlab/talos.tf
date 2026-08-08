@@ -64,26 +64,6 @@ resource "talos_machine_configuration_apply" "controller" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controller.machine_configuration
 
-  # Talos's native VIP mechanism replaces kube-vip's static pod — no extra
-  # manifest needed, just this machine config field.
-  #
-  # deviceSelector (matched by MAC), not a hardcoded interface name: Talos
-  # uses predictable interface names on Proxmox (enpXsY, assigned per PCI
-  # slot) — "eth0" doesn't exist there (that fallback is cloud-platform-only,
-  # where Talos injects net.ifnames=0) and silently attaches to nothing,
-  # which was the actual cause of the VIP/DHCP config never applying and
-  # the VM falling into Kea's dynamic pool instead of its MAC reservation.
-  #
-  # dhcp = false + explicit addresses/routes (not DHCP): Kea doesn't
-  # release a MAC's lease just because its reservation is destroyed (see
-  # the opnsense_kea_dhcpv4_reservation.k8s_vm comment in main.tf), so a
-  # tofu destroy + re-apply cycle could hand the VM a stale leased address,
-  # or drop it into the dynamic pool, instead of its intended static IP.
-  # Configuring the address statically in Talos itself makes VM
-  # provisioning independent of DHCP lease state entirely. The matching
-  # Kea reservation is kept, but purely as a dynamic-pool exclusion guard
-  # (same role it plays for the LB and VIP addresses) — not as the source
-  # of truth for this address.
   config_patches = [
     yamlencode({
       machine = {
@@ -93,16 +73,7 @@ resource "talos_machine_configuration_apply" "controller" {
               deviceSelector = {
                 hardwareAddr = local.k8s_vm_macs[count.index]
               }
-              dhcp = false
-              addresses = [
-                "${var.k8s_controller_ips[count.index]}/${split("/", var.k8s_vm_subnet_cidr)[1]}"
-              ]
-              routes = [
-                {
-                  network = "0.0.0.0/0"
-                  gateway = var.k8s_vm_subnet_gateway
-                },
-              ]
+              dhcp = true
               vip = {
                 ip = var.talos_apiserver_vip
               }
@@ -145,15 +116,6 @@ resource "talos_machine_configuration_apply" "worker" {
   machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
 
   config_patches = [
-    # Explicit interface config (matched by MAC, not a hardcoded name — see
-    # the matching comment on talos_machine_configuration_apply.controller)
-    # rather than relying on Talos's zero-config default DHCP path, so
-    # behavior is identical and verifiable across both node roles.
-    #
-    # Static addressing (dhcp = false), not DHCP — see the matching
-    # comment on talos_machine_configuration_apply.controller for why:
-    # stale Kea leases survive a destroyed reservation and would otherwise
-    # leave a recreated VM without its intended IP.
     yamlencode({
       machine = {
         network = {
@@ -162,16 +124,7 @@ resource "talos_machine_configuration_apply" "worker" {
               deviceSelector = {
                 hardwareAddr = local.k8s_vm_macs[length(var.k8s_controller_ips) + count.index]
               }
-              dhcp = false
-              addresses = [
-                "${var.k8s_worker_ips[count.index]}/${split("/", var.k8s_vm_subnet_cidr)[1]}"
-              ]
-              routes = [
-                {
-                  network = "0.0.0.0/0"
-                  gateway = var.k8s_vm_subnet_gateway
-                },
-              ]
+              dhcp = true
             },
           ]
           nameservers = [var.k8s_vm_subnet_gateway]

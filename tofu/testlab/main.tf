@@ -65,26 +65,19 @@ resource "opnsense_kea_dhcpv4_reservation" "k8s_vm" {
   mac_address = local.k8s_vm_macs[count.index]
   ip_address  = local.k8s_vm_ips[count.index]
   hostname    = local.k8s_vm_names[count.index]
-  description = "tofu: tofu/testlab k8s_vm module — pool exclusion only, VM uses a static IP configured in Talos, not DHCP"
+  description = "tofu: tofu/testlab k8s_vm module — static DHCP reservation, VM gets this IP via DHCP"
 }
 
 # Kea doesn't release a MAC's DHCP lease just because its reservation is
 # destroyed — a stale lease for the same MAC/IP can survive a tofu destroy
 # and get reissued to that MAC on next boot, causing the VM to keep the old
-# leased address instead of the (recreated) reservation's IP until the lease
-# naturally expires or is manually cleared in the OPNsense UI (observed
-# firsthand rebuilding this cluster). A tofu-destroy-time API call to
-# OPNsense's lease-delete endpoint (/api/kea/leases4/del_lease/, wraps Kea's
-# native lease4-del — https://github.com/opnsense/core/pull/10019) was
-# attempted here via a terraform_data + local-exec curl provisioner, but
-# that endpoint enforces CSRF protection even against API-key Basic-auth
-# POST requests (confirmed by hand: correct auth, correct body, -L to
-# follow the http->https redirect, still a hard 403 "CSRF check failed" —
-# not a curl or encoding issue). No workaround was found short of scripting
-# a full GUI session login (cookie + CSRF token) to reach this endpoint, so
-# it was abandoned rather than shipped broken. Until that changes, a stale
-# lease must be cleared manually in the OPNsense UI after destroy if it
-# blocks a subsequent apply from getting its reserved IP immediately.
+# leased address instead of the (recreated) reservation's IP until the
+# lease naturally expires. tofu/testlab/scripts/clear-dhcp-leases.sh (run
+# via the tofu:testlab:clear-leases / tofu:testlab:destroy mise tasks)
+# clears each VM's lease through the OPNsense API before destroy to avoid
+# this — see that script for the GUI-session-login mechanics required to
+# get past OPNsense's CSRF protection on the lease-delete endpoint, which
+# rejects even correctly-authenticated API-key Basic-auth requests.
 
 # Kea has no IPv4 pool-exclusion primitive, but a host reservation is
 # excluded from the dynamic pool regardless of whether any device ever
