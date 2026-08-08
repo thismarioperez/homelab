@@ -253,6 +253,31 @@ depends = [
   "tofu:testlab:check",
 ]
 
+[tasks."volsync:testlab:backup"]
+description = "trigger a manual volsync backup for an app in testlab, e.g. mise run volsync:testlab:backup -- pihole default"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "./scripts/volsync-backup.sh"
+
+[tasks."volsync:testlab:backup-all"]
+description = "trigger a manual volsync backup for every app in testlab (optionally scoped to one namespace), e.g. mise run volsync:testlab:backup-all -- default"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "./scripts/volsync-backup-all.sh"
+
+[tasks."volsync:testlab:restore"]
+description = "trigger a volsync restore for an app in testlab — requires a ReplicationDestination named <app>-dst (not yet wired up in kubernetes/testlab/components/volsync/)"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "./scripts/volsync-restore.sh"
+
+[tasks."volsync:testlab:snapshots"]
+description = "list available restic snapshots for an app in testlab, e.g. mise run volsync:testlab:snapshots -- pihole default"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "./scripts/volsync-snapshots.sh"
+
+[tasks."volsync:testlab:unlock"]
+description = "remove a stale restic lock left by a killed volsync mover pod in testlab, e.g. mise run volsync:testlab:unlock -- default"
+env = { KUBECONFIG = "{{config_root}}/tofu/testlab/.cache/kubeconfig.yaml" }
+run = "./scripts/volsync-unlock.sh"
+
 [tasks."format:prettier"]
 description = "format all yaml, markdown, and json files with prettier"
 run = "prettier --write ."
